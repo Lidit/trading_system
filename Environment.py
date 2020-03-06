@@ -17,7 +17,10 @@ class Environment:
             return self.observation
         return None
 
-    def get_price(self):
-        if self.observation is not None:
+    def get_pirce(self):
+        if self.observation is not None :
             return self.observation[self.PRICE_IDX]
         return None
+
+    def set_chat_data(self, chart_data):
+        self.chart_data = chart_data
