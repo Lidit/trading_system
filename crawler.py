@@ -179,4 +179,4 @@ SCI_df.to_csv("선전지수.csv", mode='w')
 # ect.
 gold = yf.Ticker("GC=F")  # 금 가격 기준(트로이온스/달러)
 gold_df = pd.DataFrame(gold.history(start="2008-12-01", end="2018-12-31"))
-gold_df.to_csv("DJI.csv", mode='w')
+gold_df.to_csv("국제금시세.csv", mode='w')
