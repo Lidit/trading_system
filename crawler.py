@@ -127,56 +127,56 @@ Date
 # 4대지수
 DJI = yf.Ticker("^DJI")
 DJI_df = pd.DataFrame(DJI.history(start="2008-12-01", end="2018-12-31"))
-DJI_df.to_csv("DJI.csv", mode='w')
+DJI_df.to_csv("./data/DJI.csv", mode='w')
 
 NASDAQ = yf.Ticker("^IXIC")
 NASDAQ_df = pd.DataFrame(NASDAQ.history(start="2008-12-01", end="2018-12-31"))
-NASDAQ_df.to_csv("NASDAQ.csv", mode='w')
+NASDAQ_df.to_csv("./data/NASDAQ.csv", mode='w')
 
 KOSPI = yf.Ticker("^KS11")
 KOSPI_df = pd.DataFrame(KOSPI.history(start="2008-12-01", end="2018-12-31"))
-KOSPI_df.to_csv("KOSPI.csv", mode='w')
+KOSPI_df.to_csv("./data/KOSPI.csv", mode='w')
 
 KOSDAQ = yf.Ticker("^KQ11")
 KOSDAQ_df = pd.DataFrame(KOSDAQ.history(start="2008-12-01", end="2018-12-31"))
-KOSDAQ_df.to_csv("KOSDAQ.csv", mode='w')
+KOSDAQ_df.to_csv("./data/KOSDAQ.csv", mode='w')
 
 # 환율
 dollarExRate = yf.Ticker("KRW=X")
 dollarExRate_df = pd.DataFrame(dollarExRate.history(start="2008-12-01", end="2018-12-31"))
-dollarExRate_df.to_csv("원달러환율.csv", mode='w')
+dollarExRate_df.to_csv("./data/원달러환율.csv", mode='w')
 
 YuanExRate = yf.Ticker("CNYKRW=X")
 YuanExRate_df = pd.DataFrame(YuanExRate.history(start="2008-12-01", end="2018-12-31"))
-YuanExRate_df.to_csv("위안화환율.csv", mode='w')
+YuanExRate_df.to_csv("./data/위안화환율.csv", mode='w')
 
 YenExRate = yf.Ticker("JPYKRW=X")
 YenExRate_df = pd.DataFrame(YenExRate.history(start="2008-12-01", end="2018-12-31"))
 # for i in YenExRate_df.all:
 #     YenExRate_df.
-YenExRate_df.to_csv("엔화환율.csv", mode='w')
+YenExRate_df.to_csv("./data/엔화환율.csv", mode='w')
 
 # 유가
 WTI = yf.Ticker("CL=F")
 WTI_df = pd.DataFrame(WTI.history(start="2008-12-01", end="2018-12-31"))
-WTI_df.to_csv("WTI유가.csv", mode='w')
+WTI_df.to_csv("./data/WTI유가.csv", mode='w')
 
 # dubai = yf.Ticker("")
 
 # 중국 지수
 SSI = yf.Ticker("000001.SS")  # 상해 종합 지수
 SSI_df = pd.DataFrame(SSI.history(start="2008-12-01", end="2018-12-31"))
-SSI_df.to_csv("상해지수.csv", mode='w')
+SSI_df.to_csv("./data/상해지수.csv", mode='w')
 
 HSI = yf.Ticker("^HSI")  # 항셍 종합 지수 (홍콩)
 HSI_df = pd.DataFrame(HSI.history(start="2008-12-01", end="2018-12-31"))
-HSI_df.to_csv("홍콩지수.csv", mode='w')
+HSI_df.to_csv("./data/홍콩지수.csv", mode='w')
 
 SCI = yf.Ticker("399106.SZ")  # 선전 종합 지수
 SCI_df = pd.DataFrame(SCI.history(start="2008-12-01", end="2018-12-31"))
-SCI_df.to_csv("선전지수.csv", mode='w')
+SCI_df.to_csv("./data/선전지수.csv", mode='w')
 
 # ect.
 gold = yf.Ticker("GC=F")  # 금 가격 기준(트로이온스/달러)
 gold_df = pd.DataFrame(gold.history(start="2008-12-01", end="2018-12-31"))
-gold_df.to_csv("국제금시세.csv", mode='w')
+gold_df.to_csv("./data/국제금시세.csv", mode='w')
