@@ -77,7 +77,7 @@ class Agent:
         else:
             exploration = False
             probs = policy_network.predict(sample) # 각 행동에 대한 확률
-            action = np.argmax(probs) if np.max(probs) > 0.1 else Agent.ACTION_HOLD
+            action = np.argmax(probs)
             confidence = probs[action]
         return action, confidence, exploration
 

@@ -41,12 +41,13 @@ class PolicyLearner:
             discount_factor = 0, start_epsilon = .5, learning = True):
         logging.info("LR : {lr}, DF : {discount_factor},"
                      "TU : [{min_trading_unit}, {max_trading_unit}],"
-                     "DRT : {delayed_reward_threshold}".
-                     format(lr=self.policy_network,
-                            discount_factor=discount_factor,
-                            min_trading_unit = self.agent.min_trading_unit,
-                            max_trading_unit = self.agent.max_trading_unit,
-                    ))
+                     "DRT : {delayed_reward_threshold}".format(
+                lr=self.policy_network.lr,
+                discount_factor=discount_factor,
+                min_trading_unit = self.agent.min_trading_unit,
+                max_trading_unit = self.agent.max_trading_unit,
+                delayed_reward_threshold=self.agent.delayed_reward_threshold
+                ))
         # 가시화 준비
 
         self.visualizer.prepare(self.environment.chart_data)
@@ -182,11 +183,11 @@ class PolicyLearner:
                          "#Buy:%d\t#Sell:%d\t#Hold:%d\t"
                          "#Stocks:%d\tPV:%s\t"
                          "POS:%s\tNEG:%s\tLoss:%10.6f" % (
-                            epoch_str, num_epoches, epsilon, exploration_cnt, itr_cnt,
-                            self.agent.num_buy, self.agent.num_sell, self.agent.num_hold,
-                            self.agent.num_stocks,
-                            locale.currency(self.agent.portfolio_value, grouping=True),
-                            pos_learning_cnt, neg_learning_cnt, loss))
+                             epoch_str, num_epoches, epsilon, exploration_cnt, itr_cnt,
+                             self.agent.num_buy, self.agent.num_sell, self.agent.num_hold,
+                             self.agent.num_stocks,
+                             locale.currency(self.agent.portfolio_value, grouping=True),
+                             pos_learning_cnt, neg_learning_cnt, loss))
 
             # 학습 관련 정보 갱신
             max_portfolio_value = max(
