@@ -19,7 +19,7 @@ logging.basicConfig(format="%(message)s", handlers=[file_handler,stream_handler]
 
 if __name__ == '__main__':
     # # stock_code = '005930' # 일단 삼성전자--
-    
+
     # cr = Crawler()
     #
     # # kospi, kosdaq 종목코드 각각 다운로드

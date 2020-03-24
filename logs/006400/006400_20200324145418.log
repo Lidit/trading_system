@@ -1684,3 +1684,9 @@ findfont: Matching :family=sans-serif:style=normal:variant=normal:weight=normal:
 [Epoch 0591/1000]	Epsilon:0.2047	#Expl.:497/2372	#Buy:1101	#Sell:1076	#Hold:195	#Stocks:24	PV:₩10,536,212	POS:8	NEG:2358	Loss:  0.063155
 [Epoch 0592/1000]	Epsilon:0.2042	#Expl.:476/2372	#Buy:1092	#Sell:1039	#Hold:241	#Stocks:53	PV:₩12,661,559	POS:11	NEG:2354	Loss:  0.063130
 [Epoch 0593/1000]	Epsilon:0.2037	#Expl.:476/2372	#Buy:1095	#Sell:1051	#Hold:226	#Stocks:44	PV:₩13,890,054	POS:9	NEG:2357	Loss:  0.063104
+[Epoch 0594/1000]	Epsilon:0.2032	#Expl.:486/2372	#Buy:1099	#Sell:1089	#Hold:184	#Stocks:9	PV:₩12,380,133	POS:5	NEG:2364	Loss:  0.062940
+[Epoch 0595/1000]	Epsilon:0.2027	#Expl.:491/2372	#Buy:1132	#Sell:1126	#Hold:114	#Stocks:6	PV:₩13,837,671	POS:8	NEG:2359	Loss:  0.063335
+[Epoch 0596/1000]	Epsilon:0.2022	#Expl.:462/2372	#Buy:1122	#Sell:1107	#Hold:143	#Stocks:16	PV:₩11,412,263	POS:6	NEG:2362	Loss:  0.063068
+[Epoch 0597/1000]	Epsilon:0.2017	#Expl.:488/2372	#Buy:1118	#Sell:1084	#Hold:170	#Stocks:33	PV:₩13,622,419	POS:10	NEG:2356	Loss:  0.063342
+[Epoch 0598/1000]	Epsilon:0.2012	#Expl.:513/2372	#Buy:1100	#Sell:1049	#Hold:223	#Stocks:51	PV:₩11,288,705	POS:10	NEG:2355	Loss:  0.063198
+[Epoch 0599/1000]	Epsilon:0.2007	#Expl.:460/2372	#Buy:1091	#Sell:1055	#Hold:226	#Stocks:35	PV:₩11,358,884	POS:9	NEG:2357	Loss:  0.063044
