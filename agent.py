@@ -1,14 +1,14 @@
 import numpy as np
 
-class Agent:
 
+class Agent:
     # 에이전트 상태가 구성하는 값 개수
-    STATE_DIM = 2 # 주식 보유 비율, 포트폴리오 가치 비율
+    STATE_DIM = 2  # 주식 보유 비율, 포트폴리오 가치 비율
 
     # 매매 수수료 및 세금
 
-    TRADING_CHARGE = 0.00015 # 거래 수수료
-    TRADING_TAX = 0.003 # 거래세
+    TRADING_CHARGE = 0.00015  # 거래 수수료
+    TRADING_TAX = 0.003  # 거래세
 
     # 행동
     ACTION_BUY = 0  # 매수
@@ -17,14 +17,14 @@ class Agent:
     ACTIONS = [ACTION_BUY, ACTION_SELL]  # 확률을 구할 행동
     NUM_ACTIONS = len(ACTIONS)  # 출력값의 개수
 
-    def __init__(self, environment, min_trading_unit = 1, max_trading_unit = 2, delayed_reward_threshold = .05):
+    def __init__(self, environment, min_trading_unit=1, max_trading_unit=2, delayed_reward_threshold=.05):
 
         self.environment = environment  # 현재 주식 가격을 가져오기 위한 환경 참조
 
         # 최소 매매 단위, 최대 매매 단위, 지연보상 임계치
         self.min_trading_unit = min_trading_unit  # 최소 단일 거래 단위
         self.max_trading_unit = max_trading_unit  # 최대 단일 거래 단위
-        self.delayed_reward_threshold = delayed_reward_threshold # 지연 보상 임계치
+        self.delayed_reward_threshold = delayed_reward_threshold  # 지연 보상 임계치
 
         # Agent 클래스의 속성
 
@@ -41,7 +41,6 @@ class Agent:
         # Agent 클래스의 상태
         self.ratio_hold = 0  # 주식 보유 비율
         self.ratio_portfolio_value = 0  # 포트폴리오 가치 비율
-
 
     def reset(self):
         self.balance = self.initial_balance
@@ -76,7 +75,7 @@ class Agent:
             action = np.random.randint(self.NUM_ACTIONS)  # 무작위로 행동 결정
         else:
             exploration = False
-            probs = policy_network.predict(sample) # 각 행동에 대한 확률
+            probs = policy_network.predict(sample)  # 각 행동에 대한 확률
             action = np.argmax(probs)
             confidence = probs[action]
         return action, confidence, exploration
@@ -99,7 +98,7 @@ class Agent:
             return self.min_trading_unit
         added_trading = max(
             min(int(confidence * (self.max_trading_unit - self.min_trading_unit)),
-                                self.max_trading_unit - self.min_trading_unit),
+                self.max_trading_unit - self.min_trading_unit),
             0)
         return self.min_trading_unit + added_trading
 
@@ -113,7 +112,7 @@ class Agent:
         # 즉시 보상 초기화
         self.immediate_reward = 0
 
-        #매수
+        # 매수
         if action == Agent.ACTION_BUY:
             # 매수할 단위를 판단
             trading_unit = self.decide_trading_unit(confidence)
@@ -123,7 +122,7 @@ class Agent:
             if balance < 0:
                 trading_unit = max(
                     min(int(self.balance / (current_price * (1 + self.TRADING_CHARGE))), self.max_trading_unit),
-                self.min_trading_unit
+                    self.min_trading_unit
                 )
             # 수수료를 적용하여 총 매수 금액 산정
             invest_amount = current_price * (1 + self.TRADING_CHARGE) * trading_unit
@@ -139,7 +138,7 @@ class Agent:
 
             # 보유 주식이 모자랄 경우 가능한 최대한 매도
             trading_unit = min(trading_unit, self.num_stocks)
-            
+
             # 매도
             invest_amount = current_price * (1 - (self.TRADING_TAX + self.TRADING_CHARGE)) * trading_unit
             self.num_stocks -= trading_unit  # 보유 주식 수를 갱신
