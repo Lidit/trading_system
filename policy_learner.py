@@ -11,19 +11,20 @@ from visualizer import Visualizer
 
 locale.setlocale(locale.LC_ALL, 'ko_KR.UTF-8')
 
+
 class PolicyLearner:
 
     def __init__(self, stock_code, chart_data, training_data=None, min_trading_unit=1, max_trading_unit=2,
                  delayed_reward_threshold=.05, lr=0.01):
         self.stock_code = stock_code
         self.chart_data = chart_data
-        self.environment = Environment(chart_data) # 환경 객체
+        self.environment = Environment(chart_data)  # 환경 객체
 
         self.agent = Agent(self.environment,
                            min_trading_unit=min_trading_unit,
                            max_trading_unit=max_trading_unit,
                            delayed_reward_threshold=delayed_reward_threshold)
-        self.training_data = training_data # 학습 데이터
+        self.training_data = training_data  # 학습 데이터
         self.sample = None
         self.training_data_idx = -1
 
@@ -37,17 +38,17 @@ class PolicyLearner:
         self.sample = None
         self.training_data_idx = -1
 
-    def fit(self, num_epoches = 1000, max_memory = 60, balance = 10000000,
-            discount_factor = 0, start_epsilon = .5, learning = True):
+    def fit(self, num_epoches=1000, max_memory=60, balance=10000000,
+            discount_factor=0, start_epsilon=.5, learning=True):
         logging.info("LR : {lr}, DF : {discount_factor},"
                      "TU : [{min_trading_unit}, {max_trading_unit}],"
                      "DRT : {delayed_reward_threshold}".format(
-                lr=self.policy_network.lr,
-                discount_factor=discount_factor,
-                min_trading_unit = self.agent.min_trading_unit,
-                max_trading_unit = self.agent.max_trading_unit,
-                delayed_reward_threshold=self.agent.delayed_reward_threshold
-                ))
+            lr=self.policy_network.lr,
+            discount_factor=discount_factor,
+            min_trading_unit=self.agent.min_trading_unit,
+            max_trading_unit=self.agent.max_trading_unit,
+            delayed_reward_threshold=self.agent.delayed_reward_threshold
+        ))
         # 가시화 준비
 
         self.visualizer.prepare(self.environment.chart_data)
@@ -146,11 +147,11 @@ class PolicyLearner:
                     delayed_reward = immediate_reward
                     self.agent.base_portfolio_value = self.agent.portfolio_value
                 if learning and delayed_reward != 0:
-                   # 배치 학습 데이터 크기
+                    # 배치 학습 데이터 크기
                     batch_size = min(batch_size, max_memory)
                     # 배치 학습 데이터 생성
                     x, y = self._get_batch(
-                         memory, batch_size, discount_factor, delayed_reward)
+                        memory, batch_size, discount_factor, delayed_reward)
                     if len(x) > 0:
                         if delayed_reward > 0:
                             pos_learning_cnt += 1

@@ -1,3 +1,6 @@
+import os
+import errno
+import settings
 import yfinance as yf
 import pandas as pd
 import pandas_datareader as pdr
@@ -29,7 +32,6 @@ class Crawler:
         df = pd.read_html(download_link, header=0)[0]
         return df;
 
-
     # kospi 종목코드 목록 다운로드
     def get_download_kospi(self):
         cr = Crawler()
@@ -37,15 +39,12 @@ class Crawler:
         df.종목코드 = df.종목코드.map('{:06d}.KS'.format)
         return df
 
-
     # kosdaq 종목코드 목록 다운로드
     def get_download_kosdaq(self):
         cr = Crawler()
         df = cr.get_download_stock('kosdaq')
         df.종목코드 = df.종목코드.map('{:06d}.KQ'.format)
         return df
-
-
 
     # 2008-12-01 ~ 2018-12-31 동안의 데이터 불러오기
     def getAllStockData(self, name):
@@ -138,6 +137,16 @@ code = crawler.get_code(code_df, '삼성전자')
 # print(samsung.history(period="1mo"))
 # dji.history(period="1mo")
 
+# Data 폴더 생성
+
+default_data_dir = os.path.join(settings.BASE_DIR, 'data')
+try:
+    if not os.path.isdir(default_data_dir):
+        os.mkdir(default_data_dir)
+except OSError as e:
+    if e.errno != errno.EEXIST:
+        print("아 폴더 만들다가 실패함 ㅠ")
+        raise
 
 # 여기서 부터 시장지표
 # 4대지수

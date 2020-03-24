@@ -2,14 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_finance import candlestick_ohlc
 
+
 class Visualizer:
 
     def __init__(self):
-        self.fig = None # 캔버스 역할
-        self.axes = None # 차트를 그리기 위한 객체
+        self.fig = None  # 캔버스 역할
+        self.axes = None  # 차트를 그리기 위한 객체
 
     def prepare(self, chart_data):
-        self.fig, self.axes = plt.subplots(nrows=4, ncols =1, facecolor='w', sharex=True)
+        self.fig, self.axes = plt.subplots(nrows=4, ncols=1, facecolor='w', sharex=True)
         for ax in self.axes:
             ax.get_xaxis().get_major_formatter().set_scientific(False)
             ax.get_yaxis().get_major_formatter().set_scientific(False)

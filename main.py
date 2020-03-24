@@ -2,20 +2,22 @@ import logging
 import os
 import settings
 import data_manager
+import errno
 from policy_learner import PolicyLearner
 from crawler import Crawler
 import pandas as pd
 
-stock_code = '006400' # 삼성SDI
+stock_code = '006400'  # 삼성SDI
 
 # 로그 기록
 log_dir = os.path.join(settings.BASE_DIR, 'logs/%s' % stock_code)
-timestr =settings.get_time_str()
-file_handler = logging.FileHandler(filename=os.path.join(log_dir, "%s_%s.log" % (stock_code, timestr)), encoding="utf-8")
+timestr = settings.get_time_str()
+file_handler = logging.FileHandler(filename=os.path.join(log_dir, "%s_%s.log" % (stock_code, timestr)),
+                                   encoding="utf-8")
 stream_handler = logging.StreamHandler()
 file_handler.setLevel(logging.DEBUG)
 stream_handler.setLevel(logging.INFO)
-logging.basicConfig(format="%(message)s", handlers=[file_handler,stream_handler], level=logging.DEBUG)
+logging.basicConfig(format="%(message)s", handlers=[file_handler, stream_handler], level=logging.DEBUG)
 
 if __name__ == '__main__':
     # # stock_code = '005930' # 일단 삼성전자--
@@ -72,6 +74,23 @@ if __name__ == '__main__':
     policy_learner.fit(balance=10000000, num_epoches=1000, discount_factor=0, start_epsilon=.5)
 
     # 정책 신경망을 파일로 저장
+    default_model_dir = os.path.join(settings.BASE_DIR, 'models')
+    try:
+        if not os.path.isdir(default_model_dir):
+            os.mkdir(default_model_dir)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            print("아 폴더 만들다가 실패함 ㅠ")
+            raise
+
     model_dir = os.path.join(settings.BASE_DIR, 'models/%s' % stock_code)
-    model_path = os.path.join(model_dir, 'model_%d.h5' % timestr)
+    try:
+        if not os.path.isdir(model_dir):
+            os.mkdir(model_dir)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            print("아 폴더 만들다가 실패함 ㅠ")
+            raise
+
+    model_path = os.path.join(model_dir, 'model_%s.h5' % timestr)
     policy_learner.policy_network.save_model(model_path)
