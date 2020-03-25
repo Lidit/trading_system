@@ -74,23 +74,30 @@ if __name__ == '__main__':
     policy_learner.fit(balance=10000000, num_epoches=1000, discount_factor=0, start_epsilon=.5)
 
     # 정책 신경망을 파일로 저장
-    default_model_dir = os.path.join(settings.BASE_DIR, 'models')
-    try:
-        if not os.path.isdir(default_model_dir):
-            os.mkdir(default_model_dir)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            print("아 폴더 만들다가 실패함 ㅠ")
-            raise
+
+    # default_model_dir = os.path.join(settings.BASE_DIR, 'models')
+    # try:
+    #     if not os.path.isdir(default_model_dir):
+    #         os.mkdir(default_model_dir)
+    # except OSError as e:
+    #     if e.errno != errno.EEXIST:
+    #         print("아 폴더 만들다가 실패함 ㅠ")
+    #         raise
+    #
+    # model_dir = os.path.join(settings.BASE_DIR, 'models/%s' % stock_code)
+    # try:
+    #     if not os.path.isdir(model_dir):
+    #         os.mkdir(model_dir)
+    # except OSError as e:
+    #     if e.errno != errno.EEXIST:
+    #         print("아 폴더 만들다가 실패함 ㅠ")
+    #         raise
+    #
+    # model_path = os.path.join(model_dir, 'model_%s.h5' % timestr)
+    # policy_learner.policy_network.save_model(model_path)
 
     model_dir = os.path.join(settings.BASE_DIR, 'models/%s' % stock_code)
-    try:
-        if not os.path.isdir(model_dir):
-            os.mkdir(model_dir)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            print("아 폴더 만들다가 실패함 ㅠ")
-            raise
-
+    if not os.path.isdir(model_dir):
+        os.makedirs(model_dir)
     model_path = os.path.join(model_dir, 'model_%s.h5' % timestr)
     policy_learner.policy_network.save_model(model_path)
