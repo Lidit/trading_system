@@ -30,7 +30,7 @@ class Crawler:
         download_link = download_link + '&marketType=' + market_type_param
 
         df = pd.read_html(download_link, header=0)[0]
-        return df;
+        return df
 
     # kospi 종목코드 목록 다운로드
     def get_download_kospi(self):
@@ -139,73 +139,81 @@ code = crawler.get_code(code_df, '삼성전자')
 
 # Data 폴더 생성
 
-default_data_dir = os.path.join(settings.BASE_DIR, 'data')
-try:
-    if not os.path.isdir(default_data_dir):
-        os.mkdir(default_data_dir)
-except OSError as e:
-    if e.errno != errno.EEXIST:
-        print("아 폴더 만들다가 실패함 ㅠ")
-        raise
+default_data_dir = os.path.join(settings.BASE_DIR, 'data/stockMarket')
+if not os.path.isdir(default_data_dir):
+    os.makedirs(default_data_dir)
 
 # 여기서 부터 시장지표
 # 4대지수
 DJI = yf.Ticker("^DJI")
 DJI_df = pd.DataFrame(DJI.history(start="2008-12-01", end="2018-12-31"))
-DJI_df.to_csv("./data/DJI.csv", mode='w')
+DJI_path = f'{default_data_dir}/DJI.csv'
+DJI_df.to_csv(DJI_path, mode='w')
 
 NASDAQ = yf.Ticker("^IXIC")
 NASDAQ_df = pd.DataFrame(NASDAQ.history(start="2008-12-01", end="2018-12-31"))
-NASDAQ_df.to_csv("./data/NASDAQ.csv", mode='w')
+NASDAQ_path = f'{default_data_dir}/NASDAQ.csv'
+NASDAQ_df.to_csv(NASDAQ_path, mode='w')
 
 KOSPI = yf.Ticker("^KS11")
 KOSPI_df = pd.DataFrame(KOSPI.history(start="2008-12-01", end="2018-12-31"))
-KOSPI_df.to_csv("./data/KOSPI.csv", mode='w')
+KOSPI_path = f'{default_data_dir}/KOSPI.csv'
+KOSPI_df.to_csv(KOSPI_path, mode='w')
 
 KOSDAQ = yf.Ticker("^KQ11")
 KOSDAQ_df = pd.DataFrame(KOSDAQ.history(start="2008-12-01", end="2018-12-31"))
-KOSDAQ_df.to_csv("./data/KOSDAQ.csv", mode='w')
+KOSDAQ_path = f'{default_data_dir}/KOSDAQ.csv'
+KOSDAQ_df.to_csv(KOSDAQ_path, mode='w')
 
 # 환율
 dollarExRate = yf.Ticker("KRW=X")
 dollarExRate_df = pd.DataFrame(dollarExRate.history(start="2008-12-01", end="2018-12-31"))
-dollarExRate_df.to_csv("./data/원달러환율.csv", mode='w')
+dollarExRate_path = f'{default_data_dir}/dollarExRate.csv'
+dollarExRate_df.to_csv(dollarExRate_path, mode='w')
 
-YuanExRate = yf.Ticker("CNYKRW=X")
-YuanExRate_df = pd.DataFrame(YuanExRate.history(start="2008-12-01", end="2018-12-31"))
-YuanExRate_df.to_csv("./data/위안화환율.csv", mode='w')
+yuanExRate = yf.Ticker("CNYKRW=X")
+yuanExRate_df = pd.DataFrame(yuanExRate.history(start="2008-12-01", end="2018-12-31"))
+yuanExRate_path = f'{default_data_dir}/yuanExRate.csv'
+yuanExRate_df.to_csv(yuanExRate_path, mode='w')
 
-YenExRate = yf.Ticker("JPYKRW=X")
-YenExRate_df = pd.DataFrame(YenExRate.history(start="2008-12-01", end="2018-12-31"))
+yenExRate = yf.Ticker("JPYKRW=X")
+yenExRate_df = pd.DataFrame(yenExRate.history(start="2008-12-01", end="2018-12-31"))
+yenExRate_path = f'{default_data_dir}/yenExRate.csv'
 # for i in YenExRate_df.all:
 #     YenExRate_df.
-YenExRate_df.to_csv("./data/엔화환율.csv", mode='w')
+yenExRate_df.to_csv(yenExRate_path, mode='w')
 
 # 유가
 WTI = yf.Ticker("CL=F")
 WTI_df = pd.DataFrame(WTI.history(start="2008-12-01", end="2018-12-31"))
-WTI_df.to_csv("./data/WTI유가.csv", mode='w')
+WTI_path = f'{default_data_dir}/WTI.csv'
+WTI_df.to_csv(WTI_path, mode='w')
 
 # dubai = yf.Ticker("")
 
 # 중국 지수
 SSI = yf.Ticker("000001.SS")  # 상해 종합 지수
 SSI_df = pd.DataFrame(SSI.history(start="2008-12-01", end="2018-12-31"))
-SSI_df.to_csv("./data/상해지수.csv", mode='w')
+SSI_path = f'{default_data_dir}/SSI.csv'
+SSI_df.to_csv(SSI_path, mode='w')
 
 HSI = yf.Ticker("^HSI")  # 항셍 종합 지수 (홍콩)
 HSI_df = pd.DataFrame(HSI.history(start="2008-12-01", end="2018-12-31"))
-HSI_df.to_csv("./data/홍콩지수.csv", mode='w')
+HSI_path = f'{default_data_dir}/HSI.csv'
+HSI_df.to_csv(HSI_path, mode='w')
 
 SCI = yf.Ticker("399106.SZ")  # 선전 종합 지수
 SCI_df = pd.DataFrame(SCI.history(start="2008-12-01", end="2018-12-31"))
-SCI_df.to_csv("./data/선전지수.csv", mode='w')
+SCI_path = f'{default_data_dir}/SCI.csv'
+SCI_df.to_csv(SCI_path, mode='w')
 
 # ect.
 gold = yf.Ticker("GC=F")  # 금 가격 기준(트로이온스/달러)
 gold_df = pd.DataFrame(gold.history(start="2008-12-01", end="2018-12-31"))
-gold_df.to_csv("./data/국제금시세.csv", mode='w')
+gold_path = f'{default_data_dir}/gold.csv'
+gold_df.to_csv(gold_path, mode='w')
 
 test = yf.Ticker(crawler.get_code(code_df, "삼성SDI"))
 test_df = pd.DataFrame(test.history(start="2008-12-01", end="2018-12-31"))
-test_df.to_csv("./data/삼성SDI.csv", mode='w')
+test_path = f'{default_data_dir}/samsungSDI.csv'
+test_df.to_csv(test_path, mode='w')

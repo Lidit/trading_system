@@ -1,7 +1,7 @@
 class Environment:
-    PRICE_IDX = 4 # 종가의 위치
+    PRICE_IDX = 4  # 종가의 위치
 
-    def __init__(self, chart_data = None):
+    def __init__(self, chart_data=None):
         self.chart_data = chart_data
         self.observation = None
         self.idx = -1
@@ -17,10 +17,10 @@ class Environment:
             return self.observation
         return None
 
-    def get_pirce(self):
-        if self.observation is not None :
+    def get_price(self):
+        if self.observation is not None:
             return self.observation[self.PRICE_IDX]
         return None
 
-    def set_chat_data(self, chart_data):
+    def set_chart_data(self, chart_data):
         self.chart_data = chart_data
