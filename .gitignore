@@ -108,3 +108,5 @@ venv.bak/
 /etc/
 /.idea/
 /.vscode/
+*.png
+/__pycache__/
