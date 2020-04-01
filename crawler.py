@@ -103,22 +103,22 @@ stock_type = {
 crawler = Crawler()
 
 
-# kospi, kosdaq 종목코드 각각 다운로드
-kospi_df = crawler.get_download_kospi()
-kosdaq_df = crawler.get_download_kosdaq()
+# # kospi, kosdaq 종목코드 각각 다운로드
+# kospi_df = crawler.get_download_kospi()
+# kosdaq_df = crawler.get_download_kosdaq()
 
-# data frame merge
-code_df = pd.concat([kospi_df, kosdaq_df])
+# # data frame merge
+# code_df = pd.concat([kospi_df, kosdaq_df])
 
-# data frame정리
-code_df = code_df[['회사명', '종목코드']]
+# # data frame정리
+# code_df = code_df[['회사명', '종목코드']]
 
-# data frame title 변경 '회사명' = name, 종목코드 = 'code'
-code_df = code_df.rename(columns={'회사명': 'name', '종목코드': 'code'})
+# # data frame title 변경 '회사명' = name, 종목코드 = 'code'
+# code_df = code_df.rename(columns={'회사명': 'name', '종목코드': 'code'})
 
-code_df
+# code_df
 
-code = crawler.get_code(code_df, '삼성전자')
+# code = crawler.get_code(code_df, '삼성전자')
 # Ticker(종목코드) 객체를 생성합니다.
 # ex) samsung = yf.Ticker(code)
 # dji = yf.Ticker("^DJI")
@@ -213,7 +213,23 @@ gold_df = pd.DataFrame(gold.history(start="2008-12-01", end="2018-12-31"))
 gold_path = f'{default_data_dir}/gold.csv'
 gold_df.to_csv(gold_path, mode='w')
 
-test = yf.Ticker(crawler.get_code(code_df, "삼성SDI"))
-test_df = pd.DataFrame(test.history(start="2008-12-01", end="2018-12-31"))
-test_path = f'{default_data_dir}/samsungSDI.csv'
-test_df.to_csv(test_path, mode='w')
+# kospi, kosdaq 종목코드 각각 다운로드
+kospi_df = crawler.get_download_kospi()
+kosdaq_df = crawler.get_download_kosdaq()
+
+# data frame merge
+code_df = pd.concat([kospi_df, kosdaq_df])
+# data frame정리
+code_df = code_df[['회사명', '종목코드']]
+# data frame title 변경 '회사명' = name, 종목코드 = 'code'
+code_df = code_df.rename(columns={'회사명': 'name', '종목코드': 'code'})
+
+data_code = crawler.get_code(code_df, "삼성SDI")
+data = yf.Ticker(data_code)
+if data_code.find(".KS"):
+    data_code = data_code.strip(".KS")
+elif data_code.find(".KQ"):
+    data_code = data_code.strip(".KQ")
+data_df = pd.DataFrame(data.history(start="2008-12-01", end="2018-12-31"))
+data_path = f'{default_data_dir}/{data_code}.csv'
+data_df.to_csv(data_path, mode='w', header=False)

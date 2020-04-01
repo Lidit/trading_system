@@ -92,8 +92,7 @@ if __name__ == '__main__':
     for stock_code in args.stock_code:
         # 차트 데이터, 학습 데이터 준비
         chart_data, training_data = data_manager.load_data(
-            os.path.join(settings.BASE_DIR, 
-            'data/{}/{}.csv'.format(args.ver, stock_code)), 
+            os.path.join(settings.BASE_DIR, f'data\stockMarket\{stock_code}.csv'), 
             args.start_date, args.end_date, ver=args.ver)
         
         # 최소/최대 투자 단위 설정

@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 
-COLUMNS_CHART_DATA = ['date', 'open', 'high', 'low', 'close', 'volume']
+COLUMNS_CHART_DATA = ['date', 'open', 'high', 'low', 'close', 'volume', 'dividends', 'stock splits']
 
 COLUMNS_TRAINING_DATA_V1 = [
     'open_lastclose_ratio', 'high_close_ratio', 'low_close_ratio',
@@ -31,12 +31,16 @@ COLUMNS_TRAINING_DATA_V2 = [
 
 
 def preprocess(data):
+    print("default data : ", data)
+
     windows = [5, 10, 20, 60, 120]
     for window in windows:
-        data['close_ma{}'.format(window)] = \
+        data[f'close_ma{window}'] = \
             data['close'].rolling(window).mean()
-        data['volume_ma{}'.format(window)] = \
+        data[f'volume_ma{window}'] = \
             data['volume'].rolling(window).mean()
+
+    print("close, volume data : ", data)
 
     data['open_lastclose_ratio'] = np.zeros(len(data))
     data.loc[1:, 'open_lastclose_ratio'] = \
@@ -73,7 +77,7 @@ def preprocess(data):
 
 def load_data(fpath, date_from, date_to, ver='v2'):
     header = None if ver == 'v1' else 0
-    data = pd.read_csv(fpath, thousands=',', header=header, 
+    data = pd.read_csv(fpath, thousands=',', header=header, names=COLUMNS_CHART_DATA,
         converters={'date': lambda x: str(x)})
     
     # 데이터 전처리
