@@ -149,6 +149,4 @@ def load_data(stock_code, date_from, date_to, ver='v2'):
     
     training_data = load_stock_index_data(ver, training_data)
 
-    print('training_data : ', training_data)
-
     return chart_data, training_data
