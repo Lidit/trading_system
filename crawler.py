@@ -139,9 +139,13 @@ crawler = Crawler()
 
 
 # Data 폴더 생성
-default_data_dir = os.path.join(settings.BASE_DIR, 'data/stockMarket')
-if not os.path.isdir(default_data_dir):
-    os.makedirs(default_data_dir)
+default_stock_index_dir = os.path.join(settings.BASE_DIR, 'data/stockIndex')
+if not os.path.isdir(default_stock_index_dir):
+    os.makedirs(default_stock_index_dir)
+
+default_stock_dir = os.path.join(settings.BASE_DIR, 'data/stocks')
+if not os.path.isdir(default_stock_dir):
+    os.makedirs(default_stock_dir)
 
 start_date = "2008-12-01"
 end_date = "2018-12-31"
@@ -150,38 +154,38 @@ end_date = "2018-12-31"
 # 4대지수
 DJI = yf.Ticker("^DJI")
 DJI_df = pd.DataFrame(DJI.history(start=start_date, end=end_date))
-DJI_path = f'{default_data_dir}/DJI.csv'
+DJI_path = f'{default_stock_index_dir}/DJI.csv'
 DJI_df.to_csv(DJI_path, mode='w', header=False)
 
 NASDAQ = yf.Ticker("^IXIC")
 NASDAQ_df = pd.DataFrame(NASDAQ.history(start=start_date, end=end_date))
-NASDAQ_path = f'{default_data_dir}/NASDAQ.csv'
+NASDAQ_path = f'{default_stock_index_dir}/NASDAQ.csv'
 NASDAQ_df.to_csv(NASDAQ_path, mode='w')
 
 KOSPI = yf.Ticker("^KS11")
 KOSPI_df = pd.DataFrame(KOSPI.history(start=start_date, end=end_date))
-KOSPI_path = f'{default_data_dir}/KOSPI.csv'
+KOSPI_path = f'{default_stock_index_dir}/KOSPI.csv'
 KOSPI_df.to_csv(KOSPI_path, mode='w')
 
 KOSDAQ = yf.Ticker("^KQ11")
 KOSDAQ_df = pd.DataFrame(KOSDAQ.history(start=start_date, end=end_date))
-KOSDAQ_path = f'{default_data_dir}/KOSDAQ.csv'
+KOSDAQ_path = f'{default_stock_index_dir}/KOSDAQ.csv'
 KOSDAQ_df.to_csv(KOSDAQ_path, mode='w')
 
 # 환율
 dollarExRate = yf.Ticker("KRW=X")
 dollarExRate_df = pd.DataFrame(dollarExRate.history(start=start_date, end=end_date))
-dollarExRate_path = f'{default_data_dir}/dollarExRate.csv'
+dollarExRate_path = f'{default_stock_index_dir}/dollarExRate.csv'
 dollarExRate_df.to_csv(dollarExRate_path, mode='w')
 
 yuanExRate = yf.Ticker("CNYKRW=X")
 yuanExRate_df = pd.DataFrame(yuanExRate.history(start=start_date, end=end_date))
-yuanExRate_path = f'{default_data_dir}/yuanExRate.csv'
+yuanExRate_path = f'{default_stock_index_dir}/yuanExRate.csv'
 yuanExRate_df.to_csv(yuanExRate_path, mode='w')
 
 yenExRate = yf.Ticker("JPYKRW=X")
 yenExRate_df = pd.DataFrame(yenExRate.history(start=start_date, end=end_date))
-yenExRate_path = f'{default_data_dir}/yenExRate.csv'
+yenExRate_path = f'{default_stock_index_dir}/yenExRate.csv'
 # for i in YenExRate_df.all:
 #     YenExRate_df.
 yenExRate_df.to_csv(yenExRate_path, mode='w')
@@ -189,7 +193,7 @@ yenExRate_df.to_csv(yenExRate_path, mode='w')
 # 유가
 WTI = yf.Ticker("CL=F")
 WTI_df = pd.DataFrame(WTI.history(start=start_date, end=end_date))
-WTI_path = f'{default_data_dir}/WTI.csv'
+WTI_path = f'{default_stock_index_dir}/WTI.csv'
 WTI_df.to_csv(WTI_path, mode='w')
 
 # dubai = yf.Ticker("")
@@ -197,23 +201,23 @@ WTI_df.to_csv(WTI_path, mode='w')
 # 중국 지수
 SSI = yf.Ticker("000001.SS")  # 상해 종합 지수
 SSI_df = pd.DataFrame(SSI.history(start=start_date, end=end_date))
-SSI_path = f'{default_data_dir}/SSI.csv'
+SSI_path = f'{default_stock_index_dir}/SSI.csv'
 SSI_df.to_csv(SSI_path, mode='w')
 
 HSI = yf.Ticker("^HSI")  # 항셍 종합 지수 (홍콩)
 HSI_df = pd.DataFrame(HSI.history(start=start_date, end=end_date))
-HSI_path = f'{default_data_dir}/HSI.csv'
+HSI_path = f'{default_stock_index_dir}/HSI.csv'
 HSI_df.to_csv(HSI_path, mode='w')
 
 SCI = yf.Ticker("399106.SZ")  # 선전 종합 지수
 SCI_df = pd.DataFrame(SCI.history(start=start_date, end=end_date))
-SCI_path = f'{default_data_dir}/SCI.csv'
+SCI_path = f'{default_stock_index_dir}/SCI.csv'
 SCI_df.to_csv(SCI_path, mode='w')
 
 # ect.
 gold = yf.Ticker("GC=F")  # 금 가격 기준(트로이온스/달러)
 gold_df = pd.DataFrame(gold.history(start=start_date, end=end_date))
-gold_path = f'{default_data_dir}/gold.csv'
+gold_path = f'{default_stock_index_dir}/gold.csv'
 gold_df.to_csv(gold_path, mode='w')
 
 # kospi, kosdaq 종목코드 각각 다운로드
@@ -234,5 +238,5 @@ if data_code.find(".KS"):
 elif data_code.find(".KQ"):
     data_code = data_code.strip(".KQ")
 data_df = pd.DataFrame(data.history(start=start_date, end=end_date))
-data_path = f'{default_data_dir}/{data_code}.csv'
+data_path = f'{default_stock_dir}/{data_code}.csv'
 data_df.to_csv(data_path, mode='w', header=False)

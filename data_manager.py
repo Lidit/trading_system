@@ -30,18 +30,21 @@ COLUMNS_TRAINING_DATA_V2 = [
     'bond_k3y_ma60_ratio', 'bond_k3y_ma120_ratio'
 ]
 
+COLUMNS_INDEX_DATA = ['DJI', 'NASDAQ', 'KOSPI', 'KOSDAQ']
 
-def preprocess(data):
-    print("default data : ", data)
+def load_stock_data(ver, stock_code):
+    header = None if ver == 'v1' else 0
+    path = os.path.join(settings.BASE_DIR, f'data/stocks/{stock_code}.csv')
+    data = pd.read_csv(path, thousands=',', header=header, names=COLUMNS_CHART_DATA,
+        converters={'date': lambda x: str(x)})
 
     windows = [5, 10, 20, 60, 120]
+
     for window in windows:
         data[f'close_ma{window}'] = \
             data['close'].rolling(window).mean()
         data[f'volume_ma{window}'] = \
             data['volume'].rolling(window).mean()
-
-    print("close, volume data : ", data)
 
     data['open_lastclose_ratio'] = np.zeros(len(data))
     data.loc[1:, 'open_lastclose_ratio'] = \
@@ -64,27 +67,67 @@ def preprocess(data):
             .replace(to_replace=0, method='ffill') \
             .replace(to_replace=0, method='bfill').values
 
-    windows = [5, 10, 20, 60, 120]
     for window in windows:
-        data['close_ma%d_ratio' % window] = \
-            (data['close'] - data['close_ma%d' % window]) \
-            / data['close_ma%d' % window]
-        data['volume_ma%d_ratio' % window] = \
-            (data['volume'] - data['volume_ma%d' % window]) \
-            / data['volume_ma%d' % window]
+        data[f'close_ma{window}_ratio'] = \
+            (data['close'] - data[f'close_ma{window}']) \
+            / data[f'close_ma{window}']
+        data[f'volume_ma{window}_ratio'] = \
+            (data[f'volume'] - data[f'volume_ma{window}']) \
+            / data[f'volume_ma{window}']
 
     return data
 
-
-def load_data(fpath, date_from, date_to, ver='v2'):
+def load_stock_index_data(ver, training_data):
     header = None if ver == 'v1' else 0
-    data = pd.read_csv(fpath, thousands=',', header=header, names=COLUMNS_CHART_DATA,
+    for index in COLUMNS_INDEX_DATA:
+        path = os.path.join(settings.BASE_DIR, f'data/stockIndex/{index}.csv')
+        data = pd.read_csv(path, thousands=',', header=header, names=COLUMNS_CHART_DATA,
         converters={'date': lambda x: str(x)})
 
-    # 데이터 전처리
-    data = preprocess(data)
+        index = index + '_'
+        windows = [5, 10, 20, 60, 120]
+        for window in windows:
+            data[f'{index}close_ma{window}'] = \
+                data['close'].rolling(window).mean()
+            data[f'{index}volume_ma{window}'] = \
+                data['volume'].rolling(window).mean()
+        
+        data[f'{index}open_lastclose_ratio'] = np.zeros(len(data))
+        data.loc[1:, f'{index}open_lastclose_ratio'] = \
+            (data['open'][1:].values - data['close'][:-1].values) \
+            / data['close'][:-1].values
+        data[f'{index}high_close_ratio'] = \
+            (data['high'].values - data['close'].values) \
+            / data['close'].values
+        data[f'{index}low_close_ratio'] = \
+            (data['low'].values - data['close'].values) \
+            / data['close'].values
+        data[f'{index}close_lastclose_ratio'] = np.zeros(len(data))
+        data.loc[1:, f'{index}close_lastclose_ratio'] = \
+            (data['close'][1:].values - data['close'][:-1].values) \
+            / data['close'][:-1].values
+        data[f'{index}volume_lastvolume_ratio'] = np.zeros(len(data))
+        data.loc[1:, f'{index}volume_lastvolume_ratio'] = \
+            (data['volume'][1:].values - data['volume'][:-1].values) \
+            / data['volume'][:-1] \
+                .replace(to_replace=0, method='ffill') \
+                .replace(to_replace=0, method='bfill').values
 
-    # 기간 필터링
+        for window in windows:
+            data[f'{index}close_ma{window}_ratio'] = \
+                (data['close'] - data[f'{index}close_ma{window}']) \
+                / data[f'{index}close_ma{window}']
+            data[f'{index}volume_ma{window}_ratio'] = \
+                (data[f'volume'] - data[f'{index}volume_ma{window}']) \
+                / data[f'{index}volume_ma{window}']
+        data.drop(COLUMNS_CHART_DATA, axis='columns',inplace=True)
+        training_data = training_data.append(data)
+    return training_data
+
+def load_data(stock_code, date_from, date_to, ver='v2'):
+    data = load_stock_data(ver, stock_code)
+    print('data : ', data)
+    #기간 필터링
     data['date'] = data['date'].str.replace('-', '')
     data = data[(data['date'] >= date_from) & (data['date'] <= date_to)]
     data = data.dropna()
@@ -104,10 +147,8 @@ def load_data(fpath, date_from, date_to, ver='v2'):
     else:
         raise Exception('Invalid version.')
     
-    default_data_dir = os.path.join(settings.BASE_DIR, 'data/stockMarket')
-    dji_data = pd.read_csv(f'{default_data_dir}/DJI.csv', thousands=',', header=header, names=COLUMNS_CHART_DATA, converters={'date':lambda x: str(x)})
-    dji_data.drop(['date', 'dividends', 'stock splits'], axis='columns',inplace=True)
-    dji_data.rename(columns = {'open':'dji_open', 'high':'dji_high', 'low':'dji_low', 'close':'dji_close', 'volume':'dji_volume'}, inplace=True)
-    training_data = training_data.append(dji_data)
+    training_data = load_stock_index_data(ver, training_data)
+
+    print('training_data : ', training_data)
 
     return chart_data, training_data
