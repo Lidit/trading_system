@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
-
+import os
+import settings
 
 COLUMNS_CHART_DATA = ['date', 'open', 'high', 'low', 'close', 'volume', 'dividends', 'stock splits']
 
@@ -79,10 +80,10 @@ def load_data(fpath, date_from, date_to, ver='v2'):
     header = None if ver == 'v1' else 0
     data = pd.read_csv(fpath, thousands=',', header=header, names=COLUMNS_CHART_DATA,
         converters={'date': lambda x: str(x)})
-    
+
     # 데이터 전처리
     data = preprocess(data)
-    
+
     # 기간 필터링
     data['date'] = data['date'].str.replace('-', '')
     data = data[(data['date'] >= date_from) & (data['date'] <= date_to)]
@@ -103,4 +104,10 @@ def load_data(fpath, date_from, date_to, ver='v2'):
     else:
         raise Exception('Invalid version.')
     
+    default_data_dir = os.path.join(settings.BASE_DIR, 'data/stockMarket')
+    dji_data = pd.read_csv(f'{default_data_dir}/DJI.csv', thousands=',', header=header, names=COLUMNS_CHART_DATA, converters={'date':lambda x: str(x)})
+    dji_data.drop(['date', 'dividends', 'stock splits'], axis='columns',inplace=True)
+    dji_data.rename(columns = {'open':'dji_open', 'high':'dji_high', 'low':'dji_low', 'close':'dji_close', 'volume':'dji_volume'}, inplace=True)
+    training_data = training_data.append(dji_data)
+
     return chart_data, training_data
