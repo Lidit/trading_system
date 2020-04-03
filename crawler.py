@@ -4,7 +4,7 @@ import settings
 import yfinance as yf
 import pandas as pd
 import pandas_datareader as pdr
-
+import argparse
 
 class Crawler:
     stock_type = {
@@ -95,11 +95,17 @@ class Crawler:
             path = f'{default_stock_index_dir}/{key}.csv'
             dataFrame.to_csv(path, mode='w', header=False)
 
+if __name__ == '__main__' :
+    parse = argparse.ArgumentParser()
+    parse.add_argument('--stock_name')
+    parse.add_argument('--start_date', default='2008-12-01')
+    parse.add_argument('--end_date', default='2018-12-31')
+    parse.add_argument('--stock_index', default='T')
+    args = parse.parse_args()
 
+    crawler = Crawler()
 
-crawler = Crawler()
-start_date = "2008-12-01"
-end_date = "2018-12-31"
-crawler.getStockIndexData(start_date, end_date)
-crawler.getStockData("삼성SDI", start_date, end_date)
+    if args.stock_index == 'T':
+        crawler.getStockIndexData(args.start_date, args.end_date)
 
+    crawler.getStockData(args.stock_name, args.start_date, args.end_date)
