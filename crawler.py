@@ -81,6 +81,7 @@ class Crawler:
             os.makedirs(default_stock_dir)
         
         data_df = pd.DataFrame(data.history(start=start_date, end=end_date))
+        data_df.drop(['Dividends', 'Stock Splits'],1, inplace=True)
         data_path = f'{default_stock_dir}/{data_code}.csv'
         data_df.to_csv(data_path, mode='w', header=False)
 
@@ -92,6 +93,7 @@ class Crawler:
         for key, value in self.stock_index.items() :
             ticker = yf.Ticker(value)
             dataFrame = pd.DataFrame(ticker.history(start=start_date, end=end_date))
+            dataFrame.drop(['Dividends', 'Stock Splits'], 1, inplace=True)
             path = f'{default_stock_index_dir}/{key}.csv'
             dataFrame.to_csv(path, mode='w', header=False)
 
