@@ -3,8 +3,7 @@ import numpy as np
 import os
 import settings
 
-COLUMNS_CHART_DATA = ['date', 'open', 'high', 'low', 'close', 'volume']
-REMOVE_COLUMNS_CHART_DATA = [ 'open', 'high', 'low', 'close', 'volume']
+COLUMNS_CHART_DATA = ['date', 'open', 'high', 'low', 'close', 'volume', 'dividends', 'stock splits']
 
 COLUMNS_TRAINING_DATA_V1 = ['date',
     'open_lastclose_ratio', 'high_close_ratio', 'low_close_ratio',
@@ -31,7 +30,7 @@ COLUMNS_TRAINING_DATA_V2 = [
     'bond_k3y_ma60_ratio', 'bond_k3y_ma120_ratio'
 ]
 
-COLUMNS_INDEX_DATA = ['DJI', 'NASDAQ', 'KOSPI']
+COLUMNS_INDEX_DATA = ['DJI', 'NASDAQ', 'KOSPI', 'KOSDAQ']
 
 def load_stock_data(ver, stock_code):
     header = None if ver == 'v1' else 0
@@ -46,7 +45,7 @@ def load_stock_data(ver, stock_code):
             data['close'].rolling(window).mean()
         data[f'volume_ma{window}'] = \
             data['volume'].rolling(window).mean()
-    
+
     data['open_lastclose_ratio'] = np.zeros(len(data))
     data.loc[1:, 'open_lastclose_ratio'] = \
         (data['open'][1:].values - data['close'][:-1].values) \
@@ -75,6 +74,7 @@ def load_stock_data(ver, stock_code):
         data[f'volume_ma{window}_ratio'] = \
             (data[f'volume'] - data[f'volume_ma{window}']) \
             / data[f'volume_ma{window}']
+
     return data
 
 def load_stock_index_data(ver, training_data):
@@ -120,9 +120,8 @@ def load_stock_index_data(ver, training_data):
             data[f'{index}volume_ma{window}_ratio'] = \
                 (data[f'volume'] - data[f'{index}volume_ma{window}']) \
                 / data[f'{index}volume_ma{window}']
-        data.drop(REMOVE_COLUMNS_CHART_DATA, axis='columns',inplace=True)
-        training_data = pd.merge(training_data, data, on='date')
-    training_data.drop('date', 1, inplace=True)
+        data.drop(COLUMNS_CHART_DATA, axis='columns',inplace=True)
+        training_data = training_data.append(data)
     return training_data
 
 def load_data(stock_code, date_from, date_to, ver='v2'):
@@ -131,11 +130,21 @@ def load_data(stock_code, date_from, date_to, ver='v2'):
             os.makedirs(default_training_dir)
     
     data = load_stock_data(ver, stock_code)
-    data_path = f'{default_training_dir}/1.default_{stock_code}.csv'
+
+    data_path = f'{default_training_dir}/defaultData.csv'
     pd.DataFrame(data).to_csv(data_path, mode='w', header=False)
+
+    #기간 필터링
+    # data['date'] = data['date'].str.replace('-', '')
+    # data = data[(data['date'] >= date_from) & (data['date'] <= date_to)]
+    # data = data.dropna()
+
+    # data_path = f'{default_training_dir}/fillterData.csv'
+    # pd.DataFrame(data).to_csv(data_path, mode='w', header=False)
+
     # 차트 데이터 분리
     chart_data = data[COLUMNS_CHART_DATA]
-    
+
     # 학습 데이터 분리
     training_data = None
     if ver == 'v1':
@@ -148,12 +157,12 @@ def load_data(stock_code, date_from, date_to, ver='v2'):
     else:
         raise Exception('Invalid version.')
     
-    data_path = f'{default_training_dir}/2.default_training_{stock_code}.csv'
+    data_path = f'{default_training_dir}/defaultTrainingData.csv'
     pd.DataFrame(training_data).to_csv(data_path, mode='w', header=False)
 
-    training_data = load_stock_index_data(ver, training_data)
+    # training_data = load_stock_index_data(ver, training_data)
     
-    data_path = f'{default_training_dir}/3.custom_training_{stock_code}.csv'
-    training_data.to_csv(data_path, mode='w', header=False)
-
+    # data_path = f'{default_training_dir}/customTraining.csv'
+    # training_data_pd = pd.DataFrame(training_data)
+    # training_data_pd.to_csv(data_path, mode='w', header=False)
     return chart_data, training_data
