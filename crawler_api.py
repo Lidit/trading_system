@@ -6,6 +6,7 @@ import time
 import pandas as pd
 import argparse
 from pandas import DataFrame
+import csv
 
 TR_REQ_TIME_INTERVAL = 0.2
 
@@ -103,6 +104,7 @@ class PyMon:
         self.kiwoom = Kiwoom()
         self.kiwoom.comm_connect()
         self.get_code_list()
+        self.index_data = list()
 
     def get_code_list(self):
         self.kospi_codes = self.kiwoom.get_code_list_by_market(MARKET_KOSPI)
@@ -121,18 +123,55 @@ class PyMon:
                        index=self.kiwoom.ohlcv['date'])
         return df
 
-    def run(self, stock_code, start_date):
-        df = self.get_ohlcv(stock_code, start_date)
-        df.to_csv(f'data/stocks/{stock_code}.csv', mode='w', header=False)
+    def run(self, stock_code, start_date, end_date):
+        df = self.get_ohlcv(stock_code, end_date)
+        df.to_csv(f'data/stocks/{stock_code}.csv', mode='a', header=False)
+        self.index_data = df.index.tolist()
         print(df)
+        return self.index_data[-1]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--stock_code')
-    parser.add_argument('--start_date', default='20190101')
-    parser.add_argument('--end_date', default='20200407')
+    parser.add_argument('--start_date', default='20081201')
+    parser.add_argument('--end_date', default='20181231')
     args = parser.parse_args()
 
     app = QApplication(sys.argv)
     pymon = PyMon()
-    pymon.run(str(args.stock_code), str(args.start_date))
+
+    pymon.run(str(args.stock_code), str(args.start_date), str(args.end_date))
+
+    f = open(f'data/stocks/{args.stock_code}.csv','r')
+    rdr = csv.reader(f)
+
+    while pymon.run(str(args.stock_code), str(args.start_date), str(args.end_date)) > args.start_date:
+        args.end_date = str(int(pymon.index_data[-1]) -1)
+
+
+# csv 정렬후 다시저장
+    f = open(f'data/stocks/{args.stock_code}.csv','r')
+    rdr = csv.reader(f)
+
+    stock_data = list()
+
+    for line in rdr:
+        stock_data.append(line)
+
+    f.close()
+
+    stock_data.sort()
+
+    # print(stock_data)
+
+    filter_index = 0
+    for i in stock_data[0:-1]:
+        if int(i[0]) < int(args.start_date) :
+            # print(i)
+            del stock_data[stock_data.index(i)]
+        # filter_index += 1
+
+    f= open(f'{args.stock_code}_test.csv', 'w', newline='')
+    wr = csv.writer(f)
+    wr.writerows(stock_data)
+    f.close()
