@@ -66,7 +66,7 @@ class Visualizer:
             for action, color in zip(action_list, self.COLORS):
                 for i in x[actions == action]:
                     # 배경 색으로 행동 표시
-                    self.axes[1].axvline(i, color=color, alpha=0.1)
+                    self.axes[1].axvline(i, color=color, alpha=0.05)
             self.axes[1].plot(x, num_stocks, '-k')  # 보유 주식 수 그리기
 
             # 차트 3. 가치 신경망
@@ -85,7 +85,7 @@ class Visualizer:
             # 차트 4. 정책 신경망
             # 탐험을 노란색 배경으로 그리기
             for exp_idx in exps:
-                self.axes[3].axvline(exp_idx, color='y')
+                self.axes[3].axvline(exp_idx, color='y', alpha=0.05)
             # 행동을 배경으로 그리기
             _outvals = outvals_policy if len(outvals_policy) > 0 \
                 else outvals_value
@@ -115,7 +115,7 @@ class Visualizer:
             self.axes[4].plot(x, pvs, '-k')
             # 학습 위치 표시
             for learning_idx in learning_idxes:
-                self.axes[4].axvline(learning_idx, color='y')
+                self.axes[4].axvline(learning_idx, color='y', alpha=0.05)
 
             # 에포크 및 탐험 비율
             self.fig.suptitle('{} \nEpoch:{}/{} e={:.2f}'.format(
