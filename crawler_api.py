@@ -133,7 +133,7 @@ class PyMon:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--stock_code')
-    parser.add_argument('--start_date', default='20081201')
+    parser.add_argument('--start_date', default='20080101')
     parser.add_argument('--end_date', default='20181231')
     args = parser.parse_args()
 

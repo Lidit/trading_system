@@ -48,6 +48,7 @@ class ReinforcementLearner:
         self.num_features = self.agent.STATE_DIM
         if self.training_data is not None:
             self.num_features += self.training_data.shape[1]
+        
         # 신경망 설정
         self.net = net
         self.num_steps = num_steps

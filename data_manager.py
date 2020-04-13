@@ -61,13 +61,14 @@ def load_stock_data(stock_code):
             / data[f'volume_ma{window}']
     return data
 
-def load_stock_index_data(training_data):
+def load_stock_index_data(training_data, date_from, date_to):
     for index in COLUMNS_INDEX_DATA:
         path = os.path.join(settings.BASE_DIR, f'data/stockIndex/{index}.csv')
         data = pd.read_csv(path, thousands=',', header=None, names=COLUMNS_CHART_DATA,
         converters={'date': lambda x: str(x)})
-        data['date'] = data['date'].str.replace('-', '')
         
+        data['date'] = data['date'].str.replace('-', '')
+
         index = index + '_'
         windows = [5, 10, 20, 60, 120]
         for window in windows:
@@ -113,6 +114,11 @@ def load_data(stock_code, date_from, date_to):
             os.makedirs(default_training_dir)
     
     data = load_stock_data(stock_code)
+
+    data['date'] = data['date'].str.replace('-', '')
+    data = data[(data['date'] >= date_from) & (data['date'] <= date_to)]
+    data = data.dropna()
+    
     data_path = f'{default_training_dir}/1.default_{stock_code}.csv'
     pd.DataFrame(data).to_csv(data_path, mode='w', header=False)
     # 차트 데이터 분리
@@ -125,7 +131,7 @@ def load_data(stock_code, date_from, date_to):
     data_path = f'{default_training_dir}/2.default_training_{stock_code}.csv'
     pd.DataFrame(training_data).to_csv(data_path, mode='w', header=False)
 
-    training_data = load_stock_index_data(training_data)
+    training_data = load_stock_index_data(training_data, date_from, date_to)
     
     data_path = f'{default_training_dir}/3.custom_training_{stock_code}.csv'
     training_data.to_csv(data_path, mode='w', header=False)

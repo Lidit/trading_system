@@ -157,19 +157,19 @@ class LSTMNetwork(Network):
 
     @staticmethod
     def get_network_head(inp):
-        output = LSTM(256, dropout=0.3, 
+        output = LSTM(256, dropout=0.5, 
             return_sequences=True, stateful=False,
             kernel_initializer='random_normal')(inp)
         output = BatchNormalization()(output)
-        output = LSTM(128, dropout=0.3,
+        output = LSTM(256, dropout=0.5,
             return_sequences=True, stateful=False,
             kernel_initializer='random_normal')(output)
         output = BatchNormalization()(output)
-        output = LSTM(64, dropout=0.3,
+        output = LSTM(256, dropout=0.5,
             return_sequences=True, stateful=False,
             kernel_initializer='random_normal')(output)
         output = BatchNormalization()(output)
-        output = LSTM(32, dropout=0.3,
+        output = LSTM(256, dropout=0.5,
             stateful=False,
             kernel_initializer='random_normal')(output)
         output = BatchNormalization()(output)
