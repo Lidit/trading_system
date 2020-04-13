@@ -162,8 +162,6 @@ if __name__ == "__main__":
 
     stock_data.sort()
 
-    # print(stock_data)
-
     filter_index = 0
     for i in stock_data[0:-1]:
         if int(i[0]) < int(args.start_date) :
@@ -171,7 +169,7 @@ if __name__ == "__main__":
             del stock_data[stock_data.index(i)]
         # filter_index += 1
 
-    f= open(f'{args.stock_code}_test.csv', 'w', newline='')
+    f = open(f'data/stocks/{args.stock_code}.csv','w', newline='')
     wr = csv.writer(f)
     wr.writerows(stock_data)
     f.close()

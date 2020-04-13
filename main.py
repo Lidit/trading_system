@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*- 
 import os
 import sys
 import logging
@@ -12,11 +13,10 @@ import data_manager
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--stock_code', nargs='+')
-    parser.add_argument('--ver', choices=['v1', 'v2'], default='v2')
     parser.add_argument('--rl_method', 
-        choices=['dqn', 'pg', 'ac', 'a2c', 'a3c'])
+        choices=['dqn', 'pg', 'ac', 'a2c', 'a3c'], default='a2c')
     parser.add_argument('--net', 
-        choices=['dnn', 'lstm', 'cnn'], default='dnn')
+        choices=['dnn', 'lstm', 'cnn'], default='lstm')
     parser.add_argument('--num_steps', type=int, default=1)
     parser.add_argument('--lr', type=float, default=0.01)
     parser.add_argument('--discount_factor', type=float, default=0.9)
@@ -70,14 +70,14 @@ if __name__ == '__main__':
     policy_network_path = ''
     if args.value_network_name is not None:
         value_network_path = os.path.join(settings.BASE_DIR, 
-            'models/{}.h5'.format(args.value_network_name))
+            f'models\{args.value_network_name}.h5')
     else:
         value_network_path = os.path.join(
             output_path, '{}_{}_value_{}.h5'.format(
                 args.rl_method, args.net, args.output_name))
     if args.policy_network_name is not None:
         policy_network_path = os.path.join(settings.BASE_DIR, 
-            'models/{}.h5'.format(args.policy_network_name))
+            'models\{}.h5'.format(args.policy_network_name))
     else:
         policy_network_path = os.path.join(
             output_path, '{}_{}_policy_{}.h5'.format(
@@ -92,7 +92,7 @@ if __name__ == '__main__':
     for stock_code in args.stock_code:
         # 차트 데이터, 학습 데이터 준비
         chart_data, training_data = data_manager.load_data(stock_code, 
-            args.start_date, args.end_date, ver=args.ver)
+            args.start_date, args.end_date)
         
         # 최소/최대 투자 단위 설정
         min_trading_unit = max(
