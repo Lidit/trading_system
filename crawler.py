@@ -99,8 +99,8 @@ class Crawler:
 
 if __name__ == '__main__' :
     parse = argparse.ArgumentParser()
-    parse.add_argument('--stock_name')
-    parse.add_argument('--start_date', default='2008-12-01')
+   # parse.add_argument('--stock_name')
+    parse.add_argument('--start_date', default='2008-01-02')
     parse.add_argument('--end_date', default='2018-12-31')
     parse.add_argument('--stock_index', default='T')
     args = parse.parse_args()
@@ -110,4 +110,4 @@ if __name__ == '__main__' :
     if args.stock_index == 'T':
         crawler.getStockIndexData(args.start_date, args.end_date)
 
-    crawler.getStockData(args.stock_name, args.start_date, args.end_date)
+    #crawler.getStockData(args.stock_name, args.start_date, args.end_date)
