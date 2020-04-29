@@ -14,7 +14,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--stock_code', nargs='+')
     parser.add_argument('--rl_method', 
-        choices=['dqn', 'pg', 'ac', 'a2c', 'a3c'], default='a2c')
+        choices=['dqn', 'pg', 'ac', 'a2c', 'a3c', 'tr'], default='a2c')
     parser.add_argument('--net', 
         choices=['dnn', 'lstm', 'cnn'], default='lstm')
     parser.add_argument('--num_steps', type=int, default=1)
