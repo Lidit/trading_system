@@ -1,4 +1,5 @@
 import sys
+import os
 from PyQt5.QtWidgets import *
 from PyQt5.QAxContainer import *
 from PyQt5.QtCore import *
@@ -7,6 +8,7 @@ import pandas as pd
 import argparse
 from pandas import DataFrame
 import csv
+from PyQt5 import uic
 
 TR_REQ_TIME_INTERVAL = 0.2
 
@@ -70,6 +72,9 @@ class Kiwoom(QAxWidget):
 
         if rqname == "opt10081_req":
             self._opt10081(rqname, trcode)
+        
+        elif rqname == "opt10080_req":
+            self._opt10080(rqname, trcode)
 
         try:
             self.tr_event_loop.exit()
@@ -95,6 +100,20 @@ class Kiwoom(QAxWidget):
             self.ohlcv['close'].append(int(close))
             # self.ohlcv['dividends'].append(int(dividends))
             self.ohlcv['volume'].append(int(volume))
+
+    def _opt10080(self, rqname, trcode):
+        data_cnt = self._get_repeat_cnt(trcode, rqname)
+
+        for i in range(data_cnt):
+            date = self._comm_get_data(trcode, "", rqname, i, "체결시간")
+            current = abs(int(self._comm_get_data(trcode, "", rqname, i, "현재가")))
+            open = abs(int(self._comm_get_data(trcode, "", rqname, i, "시가")))
+            high = abs(int(self._comm_get_data(trcode, "", rqname, i, "고가")))
+            low = abs(int(self._comm_get_data(trcode, "", rqname, i, "저가")))
+            volume = self._comm_get_data(trcode, "", rqname, i, "거래량")
+
+            print(f'체결 시간 {date} 현재가 {current} 시가 {open} 고가 {high} 저가 {low} 거래량 {volume}')
+            
 
 MARKET_KOSPI   = 0
 MARKET_KOSDAQ  = 10
@@ -123,6 +142,23 @@ class PyMon:
                        index=self.kiwoom.ohlcv['date'])
         return df
 
+    def get_ohlcv_minute(self, code, tick):
+        self.kiwoom.ohlcv = {'date': [], 'open': [], 'high': [], 'low': [], 'close': [], 'volume': []}
+
+        self.kiwoom.set_input_value("종목코드", code)
+        self.kiwoom.set_input_value("틱범위", tick)
+        self.kiwoom.set_input_value("수정주가구분", 1)
+        self.kiwoom.comm_rq_data("opt10080_req", "opt10080", 0, "0102")
+        time.sleep(0.2)
+        self.kiwoom.set_input_value("종목코드", code)
+        self.kiwoom.set_input_value("틱범위", tick)
+        self.kiwoom.set_input_value("수정주가구분", 1)
+        self.kiwoom.comm_rq_data("opt10080_req", "opt10080", 2, "0102")
+        df = DataFrame(self.kiwoom.ohlcv, columns=['open', 'high', 'low', 'close', 'volume'],
+                       index=self.kiwoom.ohlcv['date'])
+        return df
+
+
     def run(self, stock_code, start_date, end_date):
         df = self.get_ohlcv(stock_code, end_date)
         df.to_csv(f'data/stocks/{stock_code}.csv', mode='a', header=False)
@@ -130,46 +166,64 @@ class PyMon:
         print(df)
         return self.index_data[-1]
 
+
+ui_path = os.path.dirname(os.path.abspath(__file__))
+ui_path = f'{ui_path}/ui/crawler.ui'
+form_class = uic.loadUiType(ui_path)[0]
+
+class WindowClass(QMainWindow, form_class) :
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        
+        self.getStockDataButton.clicked.connect(self.getStockData)
+
+    def getStockData(self) :
+        app = QApplication(sys.argv)
+        pymon = PyMon()
+        stock_code = self.stockCodePlainTextEdit.toPlainText()
+        # start_date = self.startDatePlainTextEdit.toPlainText()
+        # end_date = self.endDatePlainTextEdit.toPlainText()
+        pymon.get_ohlcv_minute(stock_code, 1)
+        #pymon.run(str(stock_code), str(start_date), str(end_date))
+
+    #     f = open(f'data/stocks/{stock_code}.csv','r')
+    #     rdr = csv.reader(f)
+
+    #     while pymon.run(str(stock_code), str(start_date), str(end_date)) > start_date:
+    #         end_date = str(int(pymon.index_data[-1]) -1)
+
+
+    # # csv 정렬후 다시저장
+    #     f = open(f'data/stocks/{stock_code}.csv','r')
+    #     rdr = csv.reader(f)
+
+    #     stock_data = list()
+
+    #     for line in rdr:
+    #         stock_data.append(line)
+
+    #     f.close()
+
+    #     stock_data.sort()
+
+    #     filter_index = 0
+    #     for i in stock_data[0:-1]:
+    #         if int(i[0]) < int(start_date) :
+    #             # print(i)
+    #             del stock_data[stock_data.index(i)]
+    #         # filter_index += 1
+
+    #     f = open(f'data/stocks/{stock_code}.csv','w', newline='')
+    #     wr = csv.writer(f)
+    #     wr.writerows(stock_data)
+    #     f.close()
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--stock_code')
-    parser.add_argument('--start_date', default='20080101')
-    parser.add_argument('--end_date', default='20181231')
-    args = parser.parse_args()
-
     app = QApplication(sys.argv)
-    pymon = PyMon()
 
-    pymon.run(str(args.stock_code), str(args.start_date), str(args.end_date))
+    myWindow = WindowClass()
+    myWindow.show()
 
-    f = open(f'data/stocks/{args.stock_code}.csv','r')
-    rdr = csv.reader(f)
-
-    while pymon.run(str(args.stock_code), str(args.start_date), str(args.end_date)) > args.start_date:
-        args.end_date = str(int(pymon.index_data[-1]) -1)
-
-
-# csv 정렬후 다시저장
-    f = open(f'data/stocks/{args.stock_code}.csv','r')
-    rdr = csv.reader(f)
-
-    stock_data = list()
-
-    for line in rdr:
-        stock_data.append(line)
-
-    f.close()
-
-    stock_data.sort()
-
-    filter_index = 0
-    for i in stock_data[0:-1]:
-        if int(i[0]) < int(args.start_date) :
-            # print(i)
-            del stock_data[stock_data.index(i)]
-        # filter_index += 1
-
-    f = open(f'data/stocks/{args.stock_code}.csv','w', newline='')
-    wr = csv.writer(f)
-    wr.writerows(stock_data)
-    f.close()
+    app.exec_()
+    
