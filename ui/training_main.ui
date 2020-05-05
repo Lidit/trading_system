@@ -6,277 +6,133 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>2451</width>
-    <height>1627</height>
+    <width>693</width>
+    <height>393</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="horizontalLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>-10</x>
-      <y>0</y>
-      <width>2461</width>
-      <height>1521</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QTabWidget" name="tabWidget">
-       <property name="currentIndex">
-        <number>0</number>
-       </property>
-       <widget class="QWidget" name="tab">
-        <attribute name="title">
-         <string>Tab 1</string>
-        </attribute>
-        <widget class="QWidget" name="horizontalLayoutWidget_3">
-         <property name="geometry">
-          <rect>
-           <x>550</x>
-           <y>140</y>
-           <width>1241</width>
-           <height>841</height>
-          </rect>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <item>
-           <layout class="QVBoxLayout" name="verticalLayout_3">
-            <item>
-             <widget class="QLabel" name="stock_code_label">
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="tab">
+         <attribute name="title">
+          <string>Tab 1</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0">
+           <layout class="QFormLayout" name="formLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="stockCodeLabel">
               <property name="text">
-               <string>stock_code</string>
+               <string>stock code</string>
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QLabel" name="start_date_label">
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="stockCodeLineEdit"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="numEpochesLabel">
               <property name="text">
-               <string>start_date</string>
+               <string>num epoches</string>
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QLabel" name="end_date_label">
-              <property name="text">
-               <string>end_date</string>
-              </property>
-             </widget>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="numEpochesLineEdit"/>
             </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QVBoxLayout" name="verticalLayout_4">
-            <item>
-             <widget class="QPlainTextEdit" name="stockCodePlainTextEdit"/>
-            </item>
-            <item>
-             <widget class="QPlainTextEdit" name="startDatePlainTextEdit"/>
-            </item>
-            <item>
-             <widget class="QPlainTextEdit" name="endDatePlainTextEdit"/>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QPushButton" name="getStockDataButton">
-         <property name="geometry">
-          <rect>
-           <x>1100</x>
-           <y>1210</y>
-           <width>187</width>
-           <height>57</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>PushButton</string>
-         </property>
-        </widget>
-       </widget>
-       <widget class="QWidget" name="tab_2">
-        <attribute name="title">
-         <string>Tab 2</string>
-        </attribute>
-        <widget class="QWidget" name="horizontalLayoutWidget_2">
-         <property name="geometry">
-          <rect>
-           <x>550</x>
-           <y>10</y>
-           <width>1261</width>
-           <height>731</height>
-          </rect>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <property name="spacing">
-           <number>15</number>
-          </property>
-          <property name="sizeConstraint">
-           <enum>QLayout::SetDefaultConstraint</enum>
-          </property>
-          <item>
-           <layout class="QVBoxLayout" name="verticalLayout">
-            <item>
-             <widget class="QLabel" name="label_2">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
-              <property name="text">
-               <string>stock_code</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_3">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
-              <property name="text">
-               <string>num_epoches</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_4">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
+            <item row="2" column="0">
+             <widget class="QLabel" name="balanceLabel">
               <property name="text">
                <string>balance</string>
               </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
              </widget>
             </item>
-            <item>
-             <widget class="QLabel" name="label">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
+            <item row="2" column="1">
+             <widget class="QLineEdit" name="balanceLineEdit"/>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="lrLabel">
               <property name="text">
                <string>lr</string>
               </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QLineEdit" name="lrLineEdit"/>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="discountFactorLabel">
+              <property name="text">
+               <string>discount factor</string>
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QLabel" name="label_5">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
+            <item row="4" column="1">
+             <widget class="QLineEdit" name="discountFactorLineEdit"/>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="startEpsilonLabel">
               <property name="text">
-               <string>discount_factor</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <string>start epsilon</string>
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QLabel" name="label_6">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
+            <item row="5" column="1">
+             <widget class="QLineEdit" name="startEpsilonLineEdit"/>
+            </item>
+            <item row="6" column="0">
+             <widget class="QLabel" name="outputNameLabel">
               <property name="text">
-               <string>start_epsilon</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <string>output name</string>
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QLabel" name="label_7">
-              <property name="text">
-               <string>output_name</string>
-              </property>
-             </widget>
+            <item row="6" column="1">
+             <widget class="QLineEdit" name="outputNameLineEdit"/>
             </item>
            </layout>
           </item>
-          <item>
-           <layout class="QVBoxLayout" name="verticalLayout_2">
-            <item>
-             <widget class="QPlainTextEdit" name="plainTextEdit"/>
-            </item>
-            <item>
-             <widget class="QPlainTextEdit" name="plainTextEdit_2"/>
-            </item>
-            <item>
-             <widget class="QPlainTextEdit" name="plainTextEdit_3"/>
-            </item>
-            <item>
-             <widget class="QPlainTextEdit" name="plainTextEdit_4"/>
-            </item>
-            <item>
-             <widget class="QPlainTextEdit" name="plainTextEdit_5"/>
-            </item>
-            <item>
-             <widget class="QPlainTextEdit" name="plainTextEdit_6"/>
-            </item>
-            <item>
-             <widget class="QPlainTextEdit" name="plainTextEdit_7"/>
-            </item>
-           </layout>
+          <item row="1" column="0">
+           <widget class="QPushButton" name="startLearningButton">
+            <property name="text">
+             <string>PushButton</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
-        <widget class="QPushButton" name="pushButton">
-         <property name="geometry">
-          <rect>
-           <x>1090</x>
-           <y>870</y>
-           <width>187</width>
-           <height>57</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>PushButton</string>
-         </property>
+        <widget class="QWidget" name="tab_2">
+         <attribute name="title">
+          <string>Tab 2</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="0">
+           <widget class="QTextBrowser" name="textBrowser"/>
+          </item>
+         </layout>
         </widget>
        </widget>
-      </widget>
-     </item>
-    </layout>
-   </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>2451</width>
-     <height>26</height>
+     <width>693</width>
+     <height>31</height>
     </rect>
    </property>
   </widget>

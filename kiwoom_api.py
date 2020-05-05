@@ -10,17 +10,17 @@ TR_REQ_TIME_INTERVAL = 0.2
 class Kiwoom(QAxWidget):
     def __init__(self):
         super().__init__()
-        self._create_kiwoom_instance()
-        self._set_signal_slots()
+        self.create_kiwoom_instance()
+        self.set_signal_slots()
 
-    def _create_kiwoom_instance(self):
+    def create_kiwoom_instance(self):
         self.setControl("KHOPENAPI.KHOpenAPICtrl.1")
 
-    def _set_signal_slots(self):
-        self.OnEventConnect.connect(self._on_event_connect)
-        self.OnReceiveTrData.connect(self._on_receive_tr_data)
+    def set_signal_slots(self):
+        self.OnEventConnect.connect(self.on_event_connect)
+        self.OnReceiveTrData.connect(self.on_receive_tr_data)
 
-    def _on_event_connect(self, err_code):
+    def on_event_connect(self, err_code):
         if err_code == 0:
             print("connected")
         else:
@@ -28,7 +28,7 @@ class Kiwoom(QAxWidget):
 
         self.login_event_loop.exit()
     
-    def _on_receive_tr_data(self, screen_no, rqname, trcode, record_name, next, unused1, unused2, unused3, unused4):
+    def on_receive_tr_data(self, screen_no, rqname, trcode, record_name, next, unused1, unused2, unused3, unused4):
         self.ohlcv = None
 
         if next == '2':
@@ -95,23 +95,23 @@ class Kiwoom(QAxWidget):
         self.tr_event_loop = QEventLoop()
         self.tr_event_loop.exec_()
 
-    def _comm_get_data(self, code, real_type, field_name, index, item_name):
+    def comm_get_data(self, code, real_type, field_name, index, item_name):
         ret = self.dynamicCall("CommGetData(QString, QString, QString, int, QString", code,
                                real_type, field_name, index, item_name)
         return ret.strip()
     
     #분봉 가져오기
     def _opt10080(self, rqname, trcode):
-        data_cnt = self._get_repeat_cnt(trcode, rqname)
+        data_cnt = self.get_repeat_cnt(trcode, rqname)
         self.ohlcv = {'date':[], 'current':[], 'open':[], 'high':[], 'low':[], 'volume':[]}
         
         for i in range(data_cnt):
-            date = self._comm_get_data(trcode, "", rqname, i, "체결시간")
-            current = abs(int(self._comm_get_data(trcode, "", rqname, i, "현재가")))
-            open = abs(int(self._comm_get_data(trcode, "", rqname, i, "시가")))
-            high = abs(int(self._comm_get_data(trcode, "", rqname, i, "고가")))
-            low = abs(int(self._comm_get_data(trcode, "", rqname, i, "저가")))
-            volume = self._comm_get_data(trcode, "", rqname, i, "거래량")
+            date = self.comm_get_data(trcode, "", rqname, i, "체결시간")
+            current = abs(int(self.comm_get_data(trcode, "", rqname, i, "현재가")))
+            open = abs(int(self.comm_get_data(trcode, "", rqname, i, "시가")))
+            high = abs(int(self.comm_get_data(trcode, "", rqname, i, "고가")))
+            low = abs(int(self.comm_get_data(trcode, "", rqname, i, "저가")))
+            volume = self.comm_get_data(trcode, "", rqname, i, "거래량")
 
             self.ohlcv['date'].append(date)
             self.ohlcv['current'].append(current)
@@ -132,16 +132,16 @@ class Kiwoom(QAxWidget):
 
     #일봉 가져오기
     def _opt10081(self, rqname, trcode):
-        data_cnt = self._get_repeat_cnt(trcode, rqname)
+        data_cnt = self.get_repeat_cnt(trcode, rqname)
         self.ohlcv = {'date':[], 'open':[], 'high':[], 'low':[], 'close':[], 'volume':[]}
 
         for i in range(data_cnt):
-            date = self._comm_get_data(trcode, "", rqname, i, "일자")
-            open = self._comm_get_data(trcode, "", rqname, i, "시가")
-            high = self._comm_get_data(trcode, "", rqname, i, "고가")
-            low = self._comm_get_data(trcode, "", rqname, i, "저가")
-            close = self._comm_get_data(trcode, "", rqname, i, "현재가")
-            volume = self._comm_get_data(trcode, "", rqname, i, "거래량")
+            date = self.comm_get_data(trcode, "", rqname, i, "일자")
+            open = self.comm_get_data(trcode, "", rqname, i, "시가")
+            high = self.comm_get_data(trcode, "", rqname, i, "고가")
+            low = self.comm_get_data(trcode, "", rqname, i, "저가")
+            close = self.comm_get_data(trcode, "", rqname, i, "현재가")
+            volume = self.comm_get_data(trcode, "", rqname, i, "거래량")
             # dividends = self._comm_get_data(trcode, "", rqname, i, "배당금")
 
             self.ohlcv['date'].append(date)
