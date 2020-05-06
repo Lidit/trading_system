@@ -5,8 +5,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QAxContainer import *
 from PyQt5.QtCore import *
 
-TR_REQ_TIME_INTERVAL = 0.2
-
 class Kiwoom(QAxWidget):
     def __init__(self):
         super().__init__()
@@ -37,10 +35,13 @@ class Kiwoom(QAxWidget):
             self.remained_data = False
 
         if rqname == "opt10080_req":
-            self._opt10080(rqname, trcode)
+            self.opt10080(rqname, trcode)
         
         elif rqname == "opt10081_req":
-            self._opt10081(rqname, trcode)
+            self.opt10081(rqname, trcode)
+
+        elif rqname == "opt20005_req":
+            self.opt20005(rqname, trcode)
 
         try:
             self.tr_event_loop.exit()
@@ -101,7 +102,7 @@ class Kiwoom(QAxWidget):
         return ret.strip()
     
     #분봉 가져오기
-    def _opt10080(self, rqname, trcode):
+    def opt10080(self, rqname, trcode):
         data_cnt = self.get_repeat_cnt(trcode, rqname)
         self.ohlcv = {'date':[], 'current':[], 'open':[], 'high':[], 'low':[], 'volume':[]}
         
@@ -120,18 +121,8 @@ class Kiwoom(QAxWidget):
             self.ohlcv['low'].append(int(low))
             self.ohlcv['volume'].append(int(volume))
 
-            # 체결 시간 20200422101400 현재가 37750 시가 37800 고가 37800 저가 37750 거래량 2816
-            # 체결 시간 20200422101300 현재가 37800 시가 37800 고가 37800 저가 37800 거래량 138
-            # 체결 시간 20200422101200 현재가 37850 시가 37800 고가 37850 저가 37800 거래량 104
-            # 체결 시간 20200422101100 현재가 37800 시가 37800 고가 37850 저가 37800 거래량 109
-            # 체결 시간 20200422101000 현재가 37850 시가 37800 고가 37850 저가 37800 거래량 15
-            # 체결 시간 20200422100900 현재가 37800 시가 37900 고가 37900 저가 37800 거래량 467
-            # 체결 시간 20200422100800 현재가 37850 시가 37900 고가 37900 저가 37850 거래량 71
-            # 체결 시간 20200422100700 현재가 37850 시가 37850 고가 37850 저가 37850 거래량 10
-            # 체결 시간 20200422100600 현재가 37900 시가 37900 고가 37900 저가 37900 거래량 20
-
     #일봉 가져오기
-    def _opt10081(self, rqname, trcode):
+    def opt10081(self, rqname, trcode):
         data_cnt = self.get_repeat_cnt(trcode, rqname)
         self.ohlcv = {'date':[], 'open':[], 'high':[], 'low':[], 'close':[], 'volume':[]}
 
@@ -151,3 +142,23 @@ class Kiwoom(QAxWidget):
             self.ohlcv['close'].append(int(close))
             self.ohlcv['volume'].append(int(volume))
             # self.ohlcv['dividends'].append(int(dividends))
+
+    #증시 데이터 분봉 가져오기
+    def opt20005(self, rqname, trcode):
+        data_cnt = self.get_repeat_cnt(trcode, rqname)
+        self.ohlcv = {'date':[], 'current':[], 'open':[], 'high':[], 'low':[], 'volume':[]}
+
+        for i in range(data_cnt):
+            date = self.comm_get_data(trcode, "", rqname, i, "체결시간")
+            current = abs(int(self.comm_get_data(trcode, "", rqname, i, "현재가")))
+            open = abs(int(self.comm_get_data(trcode, "", rqname, i, "시가")))
+            high = abs(int(self.comm_get_data(trcode, "", rqname, i, "고가")))
+            low = abs(int(self.comm_get_data(trcode, "", rqname, i, "저가")))
+            volume = self.comm_get_data(trcode, "", rqname, i, "거래량")
+            
+            self.ohlcv['date'].append(date)
+            self.ohlcv['current'].append(current)
+            self.ohlcv['open'].append(int(open))
+            self.ohlcv['high'].append(int(high))
+            self.ohlcv['low'].append(int(low))
+            self.ohlcv['volume'].append(int(volume))

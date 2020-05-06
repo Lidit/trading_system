@@ -5,10 +5,14 @@ import datetime
 def call_printer(original_func):
     """original 함수 call 시, 현재 시간과 함수 명을 출력하는 데코레이터"""
 
-    def wrapper(*args, **kwargs):
+    def wrapper(self):
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-        print('[{:.22s}] func `{}` is called'.format(timestamp, original_func.__name__))
-        return original_func(*args, **kwargs)
+        self.return_status_msg = '[{:.22s}] func `{}` 시작됨'.format(timestamp, original_func.__name__)
+        ret = original_func(self)
+        
+        timestamp = datetime.datetime.now().strftime('%H:%M:%S')
+        self.return_status_msg = '`{}` 완료됨[{}]'.format(original_func.__name__, timestamp)
+        return ret
 
     return wrapper
 

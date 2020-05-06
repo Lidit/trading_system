@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>705</width>
-    <height>673</height>
+    <width>515</width>
+    <height>267</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -26,166 +26,114 @@
      <height>16777215</height>
     </size>
    </property>
-   <widget class="QWidget" name="horizontalLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>90</x>
-      <y>40</y>
-      <width>381</width>
-      <height>150</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout_7">
-       <item>
-        <widget class="QLabel" name="stock_code_label_3">
-         <property name="maximumSize">
-          <size>
-           <width>300</width>
-           <height>50</height>
-          </size>
-         </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <layout class="QFormLayout" name="formLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="stockCodeLabel">
+        <property name="text">
+         <string>stockCode</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="stockCodeLineEdit">
+        <property name="text">
+         <string>010060</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="startDateLabel">
+        <property name="text">
+         <string>startDate</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDateEdit" name="startDateDateEdit">
+        <property name="dateTime">
+         <datetime>
+          <hour>9</hour>
+          <minute>0</minute>
+          <second>0</second>
+          <year>2020</year>
+          <month>4</month>
+          <day>25</day>
+         </datetime>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="endDateLabel">
+        <property name="text">
+         <string>endDate</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QDateEdit" name="endDateDateEdit">
+        <property name="dateTime">
+         <datetime>
+          <hour>15</hour>
+          <minute>30</minute>
+          <second>0</second>
+          <year>2020</year>
+          <month>5</month>
+          <day>6</day>
+         </datetime>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="tickTypeLabel">
+        <property name="text">
+         <string>tickType</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QComboBox" name="tickTypeComboBox">
+        <item>
          <property name="text">
-          <string>stock_code</string>
+          <string>분봉</string>
          </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="start_date_label_3">
-         <property name="maximumSize">
-          <size>
-           <width>300</width>
-           <height>50</height>
-          </size>
-         </property>
+        </item>
+        <item>
          <property name="text">
-          <string>start_date</string>
+          <string>일봉</string>
          </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="end_date_label_3">
-         <property name="maximumSize">
-          <size>
-           <width>300</width>
-           <height>50</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>end_date</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>tick_unit</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout_8">
-       <item>
-        <widget class="QPlainTextEdit" name="stockCodePlainTextEdit">
-         <property name="maximumSize">
-          <size>
-           <width>300</width>
-           <height>30</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QDateEdit" name="startDate">
-         <property name="maximumSize">
-          <size>
-           <width>300</width>
-           <height>20</height>
-          </size>
-         </property>
-         <property name="dateTime">
-          <datetime>
-           <hour>0</hour>
-           <minute>0</minute>
-           <second>0</second>
-           <year>2020</year>
-           <month>4</month>
-           <day>19</day>
-          </datetime>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QDateEdit" name="endDate">
-         <property name="maximumSize">
-          <size>
-           <width>300</width>
-           <height>20</height>
-          </size>
-         </property>
-         <property name="dateTime">
-          <datetime>
-           <hour>12</hour>
-           <minute>0</minute>
-           <second>0</second>
-           <year>2020</year>
-           <month>5</month>
-           <day>5</day>
-          </datetime>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="tickComboBox">
-         <item>
-          <property name="text">
-           <string>분봉</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>일봉</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-      </layout>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QPushButton" name="getStockDataButton">
-    <property name="geometry">
-     <rect>
-      <x>190</x>
-      <y>230</y>
-      <width>187</width>
-      <height>50</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>데이터 가져오기</string>
-    </property>
-   </widget>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="2" column="0">
+     <widget class="QPushButton" name="getStockDataButton">
+      <property name="text">
+       <string>데이터 가져오기</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QCheckBox" name="checkBox">
+      <property name="text">
+       <string>stockIndex</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>705</width>
-     <height>26</height>
+     <width>515</width>
+     <height>31</height>
     </rect>
    </property>
   </widget>

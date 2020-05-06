@@ -24,6 +24,7 @@ class MainWindow(QMainWindow, form_class):
         self.setupUi(self)
 
         self.startLearningButton.clicked.connect(self.startLearning)
+        self.stockCodeLineEdit.setText('010060')
         self.numEpochesLineEdit.setText('1000')
         self.balanceLineEdit.setText('10000000')
         self.lrLineEdit.setText('0.001')
@@ -32,14 +33,14 @@ class MainWindow(QMainWindow, form_class):
         self.outputNameLineEdit.setText(utils.get_time_str())
 
     def startLearning(self):
-
+        self.startLearningButton.setEnabled(False)
         print(self.stockCodeLineEdit.text())
         stock_code = self.stockCodeLineEdit.text()
         num_epoches = int(self.numEpochesLineEdit.text())
         balance = int(self.balanceLineEdit.text())
         lr = float(self.lrLineEdit.text())
         discount_factor = float(self.discountFactorLineEdit.text())
-        startEpsilon = float(self.startEpsilonLineEdit.text())
+        start_epsilon = float(self.startEpsilonLineEdit.text())
         output_name = self.outputNameLineEdit.text()
         rl_method = 'a2c'
         net = 'lstm'
@@ -51,8 +52,8 @@ class MainWindow(QMainWindow, form_class):
 
         reuse_models = False
         learning = True
-        start_date = ""
-        end_date = ""
+        start_date = "20200427090000"
+        end_date = "20200506153000"
 
         os.environ['KERAS_BACKEND'] = backend
 
@@ -105,12 +106,19 @@ class MainWindow(QMainWindow, form_class):
         # for stock_code in stock_code:
         #     # 차트 데이터, 학습 데이터 준비
         chart_data, training_data = data_manager.load_data(stock_code, start_date, end_date)
-
+        print(chart_data)
+        print(training_data)
         # 최소/최대 투자 단위 설정
         min_trading_unit = max(
-            int(100000 / chart_data.iloc[-1]['close']), 1)
+            int(100000 / chart_data.iloc[-1]['low']), 1)
         max_trading_unit = max(
-             int(1000000 / chart_data.iloc[-1]['close']), 1)
+             int(1000000 / chart_data.iloc[-1]['low']), 1)
+
+        # # 최소/최대 투자 단위 설정
+        # min_trading_unit = max(
+        #     int(100000 / chart_data.iloc[-1]['close']), 1)
+        # max_trading_unit = max(
+        #      int(1000000 / chart_data.iloc[-1]['close']), 1)
 
          # 공통 파라미터 설정
         common_params = {'rl_method': rl_method,
@@ -175,6 +183,7 @@ class MainWindow(QMainWindow, form_class):
                         start_epsilon=start_epsilon,
                         learning=learning)
             learner.save_models()
+        self.startLearningButton.setEnabled(True)
 
 
 if __name__ == '__main__':
