@@ -1,175 +1,171 @@
 import sys
+import os
+import time
+import datetime
+import pandas as pd
+import csv
+from pandas import DataFrame
+
 from PyQt5.QtWidgets import *
 from PyQt5.QAxContainer import *
 from PyQt5.QtCore import *
-import time
-import pandas as pd
-import argparse
-from pandas import DataFrame
-import csv
+from PyQt5 import uic
 
-TR_REQ_TIME_INTERVAL = 0.2
-
-class Kiwoom(QAxWidget):
-    def __init__(self):
-        super().__init__()
-        self._create_kiwoom_instance()
-        self._set_signal_slots()
-
-    def _create_kiwoom_instance(self):
-        self.setControl("KHOPENAPI.KHOpenAPICtrl.1")
-
-    def _set_signal_slots(self):
-        self.OnEventConnect.connect(self._event_connect)
-        self.OnReceiveTrData.connect(self._receive_tr_data)
-
-    def comm_connect(self):
-        self.dynamicCall("CommConnect()")
-        self.login_event_loop = QEventLoop()
-        self.login_event_loop.exec_()
-
-    def _event_connect(self, err_code):
-        if err_code == 0:
-            print("connected")
-        else:
-            print("disconnected")
-
-        self.login_event_loop.exit()
-
-    def get_code_list_by_market(self, market):
-        code_list = self.dynamicCall("GetCodeListByMarket(QString)", market)
-        code_list = code_list.split(';')
-        return code_list[:-1]
-
-    def get_master_code_name(self, code):
-        code_name = self.dynamicCall("GetMasterCodeName(QString)", code)
-        return code_name
-
-    def set_input_value(self, id, value):
-        self.dynamicCall("SetInputValue(QString, QString)", id, value)
-
-    def comm_rq_data(self, rqname, trcode, next, screen_no):
-        self.dynamicCall("CommRqData(QString, QString, int, QString", rqname, trcode, next, screen_no)
-        self.tr_event_loop = QEventLoop()
-        self.tr_event_loop.exec_()
-
-    def _comm_get_data(self, code, real_type, field_name, index, item_name):
-        ret = self.dynamicCall("CommGetData(QString, QString, QString, int, QString", code,
-                               real_type, field_name, index, item_name)
-        return ret.strip()
-
-    def _get_repeat_cnt(self, trcode, rqname):
-        ret = self.dynamicCall("GetRepeatCnt(QString, QString)", trcode, rqname)
-        return ret
-
-    def _receive_tr_data(self, screen_no, rqname, trcode, record_name, next, unused1, unused2, unused3, unused4):
-        if next == '2':
-            self.remained_data = True
-        else:
-            self.remained_data = False
-
-        if rqname == "opt10081_req":
-            self._opt10081(rqname, trcode)
-
-        try:
-            self.tr_event_loop.exit()
-        except AttributeError:
-            pass
-
-    def _opt10081(self, rqname, trcode):
-        data_cnt = self._get_repeat_cnt(trcode, rqname)
-
-        for i in range(data_cnt):
-            date = self._comm_get_data(trcode, "", rqname, i, "일자")
-            open = self._comm_get_data(trcode, "", rqname, i, "시가")
-            high = self._comm_get_data(trcode, "", rqname, i, "고가")
-            low = self._comm_get_data(trcode, "", rqname, i, "저가")
-            close = self._comm_get_data(trcode, "", rqname, i, "현재가")
-            volume = self._comm_get_data(trcode, "", rqname, i, "거래량")
-            # dividends = self._comm_get_data(trcode, "", rqname, i, "배당금")
-
-            self.ohlcv['date'].append(date)
-            self.ohlcv['open'].append(int(open))
-            self.ohlcv['high'].append(int(high))
-            self.ohlcv['low'].append(int(low))
-            self.ohlcv['close'].append(int(close))
-            # self.ohlcv['dividends'].append(int(dividends))
-            self.ohlcv['volume'].append(int(volume))
+from kiwoom_api import Kiwoom            
+import decorators
 
 MARKET_KOSPI   = 0
 MARKET_KOSDAQ  = 10
 
-class PyMon:
+TR_REQ_TIME_INTERVAL = 0.2
+
+STOCK_DATA_PATH = f'{os.path.dirname(os.path.abspath(__file__))}/data/stocks'
+STOCK_INDEX_DATA_PATH = f'{os.path.dirname(os.path.abspath(__file__))}/data/stockIndex'
+
+ui_path = f'{os.path.dirname(os.path.abspath(__file__))}/ui/crawler.ui'
+form_class = uic.loadUiType(ui_path)[0]
+
+class MainWindow(QMainWindow, form_class) :
     def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        
         self.kiwoom = Kiwoom()
+
         self.kiwoom.comm_connect()
-        self.get_code_list()
-        self.index_data = list()
 
-    def get_code_list(self):
-        self.kospi_codes = self.kiwoom.get_code_list_by_market(MARKET_KOSPI)
-        self.kosdaq_codes = self.kiwoom.get_code_list_by_market(MARKET_KOSDAQ)
+        self.return_status_msg = ''
 
-    def get_ohlcv(self, code, start):
-        self.kiwoom.ohlcv = {'date': [], 'open': [], 'high': [], 'low': [], 'close': [], 'volume': []}
+        self.timer = QTimer(self)
+        self.timer.start(1000)
+        self.timer.timeout.connect(self.timeOut)
 
-        self.kiwoom.set_input_value("종목코드", code)
-        self.kiwoom.set_input_value("기준일자", start)
-        self.kiwoom.set_input_value("수정주가구분", 1)
-        self.kiwoom.comm_rq_data("opt10081_req", "opt10081", 0, "0101")
-        time.sleep(0.2)
+        self.getStockDataButton.clicked.connect(self.getStockData)
 
-        df = DataFrame(self.kiwoom.ohlcv, columns=['open', 'high', 'low', 'close', 'volume'],
-                       index=self.kiwoom.ohlcv['date'])
-        return df
+    def timeOut(self):
+        current_time = QTime.currentTime()
 
-    def run(self, stock_code, start_date, end_date):
-        df = self.get_ohlcv(stock_code, end_date)
-        df.to_csv(f'data/stocks/{stock_code}.csv', mode='a', header=False)
-        self.index_data = df.index.tolist()
-        print(df)
-        return self.index_data[-1]
+        text_time = current_time.toString("hh:mm:ss")
+        time_msg = f'현재시간 : {text_time}'
 
+        state =self.kiwoom.get_connect_state()
+
+        if state == 1:
+            state_msg = "서버 연결 중"
+        else:
+            state_msg = "서버 연결 끊김"
+
+        if self.return_status_msg == '':
+            statusbar_msg = f'{state_msg} | {time_msg}'
+        else:
+            statusbar_msg = f'{state_msg} | {time_msg} | {self.return_status_msg}'
+        
+        self.statusbar.showMessage(statusbar_msg)
+
+    @decorators.call_printer
+    def getStockData(self) :
+        self.getStockDataButton.setEnabled(False)
+        stock_code = self.stockCodeLineEdit.text()
+        tick_unit = self.tickTypeComboBox.currentText()
+        tick_range = 1
+        base_date = datetime.datetime.today().strftime("%Y%m%d%H%M%S")
+
+        start_datetime = datetime.datetime.fromordinal(self.startDateDateEdit.date().toPyDate().toordinal())
+        start_dateitme = start_datetime.replace(hour=9, minute=0, second=0)
+        start_date = start_dateitme.strftime("%Y%m%d%H%M%S")
+
+        end_datetime = datetime.datetime.fromordinal(self.endDateDateEdit.date().toPyDate().toordinal())
+        end_dateitme = end_datetime.replace(hour=16, minute=0, second=0)
+        end_date = end_dateitme.strftime("%Y%m%d%H%M%S")
+
+        if tick_unit == "분봉":
+            self.kiwoom.set_input_value("종목코드", stock_code)
+            self.kiwoom.set_input_value("틱범위", tick_range)
+            self.kiwoom.set_input_value("수정주가구분", 1)
+            self.kiwoom.comm_rq_data("opt10080_req", "opt10080", 0, "0101")
+
+            ohlcv = self.kiwoom.ohlcv
+
+            while self.kiwoom.remained_data == True:
+                time.sleep(TR_REQ_TIME_INTERVAL)
+                if ohlcv['date'][-1] < start_date:
+                    break
+                self.return_stats_msg = "분봉 받는중..."
+                self.kiwoom.set_input_value("종목코드", stock_code)
+                self.kiwoom.set_input_value("틱범위", tick_range)
+                self.kiwoom.set_input_value("수정주가구분", 1)
+                self.kiwoom.comm_rq_data("opt10080_req", "opt10080", 2, "0101")
+                for key, val in self.kiwoom.ohlcv.items():
+                    ohlcv[key][-1:] = val
+            
+            df = pd.DataFrame(ohlcv, columns=['date','current', 'open', 'high', 'low', 'volume'])
+            df = df[df.date >= start_date]
+            df = df.sort_values(by=['date'], axis=0)
+            df = df.reset_index(drop=True)
+            df.to_csv(f'{STOCK_DATA_PATH}/{stock_code}.csv', mode='w', header=False)
+            
+        elif tick_unit == "일봉":
+            self.kiwoom.set_input_value("종목코드", stock_code)
+            self.kiwoom.set_input_value("기준일자", base_date)
+            self.kiwoom.set_input_value("수정주가구분", 1)
+            self.kiwoom.comm_rq_data("opt10081_req", "opt10081", 0, "0101")
+            ohlcv = self.kiwoom.ohlcv
+
+            while self.kiwoom.remained_data == True:
+                time.sleep(TR_REQ_TIME_INTERVAL)
+                self.kiwoom.set_input_value("종목코드", stock_code)
+                self.kiwoom.set_input_value("기준일자", base_date)
+                self.kiwoom.set_input_value("수정주가구분", 1)
+                self.kiwoom.comm_rq_data("opt10081_req", "opt10081", 2, "0101")
+                for key, val in self.kiwoom.ohlcv.items():
+                    ohlcv[key][-1:] = val
+
+            df = pd.DataFrame(ohlcv, columns=['open', 'high', 'low', 'close', 'volume'], index=ohlcv['date'])
+            df.to_csv(f'{STOCK_DATA_PATH}/{stock_code}.csv', mode='w')
+        
+        if self.checkBox.isChecked():
+            self.kiwoom.set_input_value("업종코드", "001")
+            self.kiwoom.set_input_value("틱범위", "1")
+            self.kiwoom.comm_rq_data("opt20005_req", "opt20005", 0, "0101")
+
+            while self.kiwoom.remained_data == True:
+                time.sleep(TR_REQ_TIME_INTERVAL)
+                if ohlcv['date'][-1] < start_date:
+                    break
+                self.return_stats_msg = "코스피 분봉 받는중..."
+                self.kiwoom.set_input_value("업종코드", "001")
+                self.kiwoom.set_input_value("틱범위", "1")
+                self.kiwoom.comm_rq_data("opt20005_req", "opt20005", 2, "0101")
+
+            df = pd.DataFrame(ohlcv, columns=['date','current', 'open', 'high', 'low', 'volume'])
+            df = df[df.date >= start_date]
+            df = df.sort_values(by=['date'], axis=0)
+            df = df.reset_index(drop=True)
+            df.to_csv(f'{STOCK_INDEX_DATA_PATH}/KOSPI.csv', mode='w', header=False)
+
+            self.kiwoom.set_input_value("업종코드", "101")
+            self.kiwoom.set_input_value("틱범위", "1")
+            self.kiwoom.comm_rq_data("opt20005_req", "opt20005", 0,"0101")
+
+            while self.kiwoom.remained_data == True:
+                time.sleep(TR_REQ_TIME_INTERVAL)
+                if ohlcv['date'][-1] < start_date:
+                    break
+                self.return_stats_msg = "코스닥 분봉 받는중..."
+                self.kiwoom.set_input_value("업종코드", "101")
+                self.kiwoom.set_input_value("틱범위", "1")
+                self.kiwoom.comm_rq_data("opt20005_req", "opt20005", 2, "0101")
+
+            df = pd.DataFrame(ohlcv, columns=['date','current', 'open', 'high', 'low', 'volume'])
+            df = df[df.date >= start_date]
+            df = df.sort_values(by=['date'], axis=0)
+            df = df.reset_index(drop=True)
+            df.to_csv(f'{STOCK_INDEX_DATA_PATH}/KOSDAQ.csv', mode='w', header=False)
+        self.getStockDataButton.setEnabled(True)
+            
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--stock_code')
-    parser.add_argument('--start_date', default='20080101')
-    parser.add_argument('--end_date', default='20181231')
-    args = parser.parse_args()
-
     app = QApplication(sys.argv)
-    pymon = PyMon()
-
-    pymon.run(str(args.stock_code), str(args.start_date), str(args.end_date))
-
-    f = open(f'data/stocks/{args.stock_code}.csv','r')
-    rdr = csv.reader(f)
-
-    while pymon.run(str(args.stock_code), str(args.start_date), str(args.end_date)) > args.start_date:
-        args.end_date = str(int(pymon.index_data[-1]) -1)
-
-
-# csv 정렬후 다시저장
-    f = open(f'data/stocks/{args.stock_code}.csv','r')
-    rdr = csv.reader(f)
-
-    stock_data = list()
-
-    for line in rdr:
-        stock_data.append(line)
-
-    f.close()
-
-    stock_data.sort()
-
-    filter_index = 0
-    for i in stock_data[0:-1]:
-        if int(i[0]) < int(args.start_date) :
-            # print(i)
-            del stock_data[stock_data.index(i)]
-        # filter_index += 1
-
-    f = open(f'data/stocks/{args.stock_code}.csv','w', newline='')
-    wr = csv.writer(f)
-    wr.writerows(stock_data)
-    f.close()
+    mainWindow = MainWindow()
+    mainWindow.show()
+    app.exec_()
+    

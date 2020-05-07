@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>693</width>
+    <height>393</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="tab">
+         <attribute name="title">
+          <string>Tab 1</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0">
+           <layout class="QFormLayout" name="formLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="stockCodeLabel">
+              <property name="text">
+               <string>stock code</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="stockCodeLineEdit"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="numEpochesLabel">
+              <property name="text">
+               <string>num epoches</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="numEpochesLineEdit"/>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="balanceLabel">
+              <property name="text">
+               <string>balance</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLineEdit" name="balanceLineEdit"/>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="lrLabel">
+              <property name="text">
+               <string>lr</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QLineEdit" name="lrLineEdit"/>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="discountFactorLabel">
+              <property name="text">
+               <string>discount factor</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QLineEdit" name="discountFactorLineEdit"/>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="startEpsilonLabel">
+              <property name="text">
+               <string>start epsilon</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="QLineEdit" name="startEpsilonLineEdit"/>
+            </item>
+            <item row="6" column="0">
+             <widget class="QLabel" name="outputNameLabel">
+              <property name="text">
+               <string>output name</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1">
+             <widget class="QLineEdit" name="outputNameLineEdit"/>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="0">
+           <widget class="QPushButton" name="startLearningButton">
+            <property name="text">
+             <string>PushButton</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tab_2">
+         <attribute name="title">
+          <string>Tab 2</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="0">
+           <widget class="QTextBrowser" name="textBrowser"/>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>693</width>
+     <height>31</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
