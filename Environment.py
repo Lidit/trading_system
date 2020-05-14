@@ -24,3 +24,13 @@ class Environment:
 
     def set_chart_data(self, chart_data):
         self.chart_data = chart_data
+
+class RealTimeEnvironment(Environment):
+    PRICE_IDX = int() # 실시간 가격의 위치
+
+    def __init__(self, chart_data = None):
+        self.chart_data = chart_data
+        self.observation = None
+        self.idx = -1
+
+    
