@@ -10,9 +10,6 @@ from environment import Environment
 from agent import Agent
 from networks import Network, DNN, LSTMNetwork, CNN
 from visualizer import Visualizer
-from kiwoom import Kiwoom
-
-kw = Kiwoom()
 
 class ReinforcementLearner:
     __metaclass__ = abc.ABCMeta
@@ -644,8 +641,8 @@ class A3CLearner(ReinforcementLearner):
 #         max_portfolio_value = 0
 #         epoch_win_cnt = 0
 
-#         # 학습 반복
-#         for epoch in range(num_epoches):
+#         # 학습 반복 (거래 반복)
+#         while(int(time.strftime(%Y%M%d%h%m%s))<int(time.strftime(%Y%M%d)+'153000'):
 #             time_start_epoch = time.time()
 
 #             # step 샘플을 만들기 위한 큐
