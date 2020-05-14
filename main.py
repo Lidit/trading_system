@@ -45,15 +45,15 @@ class MainWindow(QMainWindow, form_class):
         rl_method = 'a2c'
         net = 'lstm'
         num_steps = 5
-        delayed_reward_threshold = 0.05
+        delayed_reward_threshold = 0.1
         backend = 'tensorflow'
         value_network_name = ""
         policy_network_name = ""
 
         reuse_models = False
         learning = True
-        start_date = "20200427090000"
-        end_date = "20200506153000"
+        start_date = "20200505090000"
+        end_date = "20200512153000"
 
         os.environ['KERAS_BACKEND'] = backend
 
