@@ -12,20 +12,85 @@ import json
 import pandas as pd
 import sys
 import time
-
+import datetime
+from datetime import timedelta
+import data_manager
 from kiwoom import Kiwoom, logger
+import settings
+import pandas as pd
+
+from kiwoom_api import Kiwoom as kwm
+import decorator
+import os
 from PyQt5.QtWidgets import QApplication
 
-SLEEP_TIME = 0.1
+SLEEP_TIME = 0.34
+TR_REQ_TIME_INTERVAL = 0.2
+
+STOCK_DATA_PATH = f'{os.path.dirname(os.path.abspath(__file__))}/data/stocks'
+STOCK_INDEX_DATA_PATH = f'{os.path.dirname(os.path.abspath(__file__))}/data/stockIndex'
+
+# @decorators.call_printer
 
 
 class PriceHandler(RequestHandler):
     def __init__(self, application, request, **kwargs):
         super().__init__(application, request, **kwargs)
         self.event = None
-
+        self.kw = kwm()
+    
     def wait_response(self, price):
         self.event.set()
+    
+    def getStockData(self, stock_code) :
+    
+        stock_code = stock_code
+        # tick_unit = "분봉"
+        tick_range = 1
+        # base_date = datetime.datetime.today().strftime("%Y%m%d%H%M%S")
+
+        # start_datetime = datetime.datetime.fromordinal(self.startDateDateEdit.date().toPyDate().toordinal())
+        # end_dateitme = time.localtime(time.time())
+        
+        # end_date = time.localtime(time.time())
+
+
+        # end_date = time.strftime("%Y%m%d%H%M00",time.localtime(time.time()) )
+        # start_datetime = end_date - timedelta(days=5)
+        # start_date = time.strftime("%Y%m%d%H%M00", start_datetime)
+
+        # end_datetime = datetime.datetime.fromordinal(self.endDateDateEdit.date().toPyDate().toordinal())
+
+        start_date = "20200512090000"
+        end_date = "20200519160000"
+
+
+        self.kw.set_input_value("종목코드", stock_code)
+        self.kw.set_input_value("틱범위", tick_range)
+        self.kw.set_input_value("수정주가구분", 1)
+        self.kw.comm_rq_data("opt10080_req", "opt10080", 0, "0101")
+
+        ohlcv = self.kw.ohlcv
+
+        while self.kw.remained_data == True:
+            time.sleep(TR_REQ_TIME_INTERVAL)
+            if ohlcv['date'][-1] < start_date:
+                break
+            self.return_stats_msg = "분봉 받는중..."
+            self.kw.set_input_value("종목코드", stock_code)
+            self.kw.set_input_value("틱범위", tick_range)
+            self.kw.set_input_value("수정주가구분", 1)
+            self.kw.comm_rq_data("opt10080_req", "opt10080", 2, "0101")
+            for key, val in self.kw.ohlcv.items():
+                ohlcv[key][-1:] = val
+
+        df = pd.DataFrame(ohlcv, columns=['date','current', 'open', 'high', 'low', 'volume'])
+        df = df[df.date >= start_date]
+        df = df.sort_values(by=['date'], axis=0)
+        df = df.reset_index(drop=True)
+        df.to_csv(f'{STOCK_DATA_PATH}/{stock_code}.csv', mode='w', header=False)
+
+
 
     def post(self):
         """
@@ -36,24 +101,50 @@ class PriceHandler(RequestHandler):
 
         code = data["code"]
         hts.dict_stock[code] = {}
-
+        data_lenth = 750
         # Make request
-        hts.kiwoom_TR_OPT10001_주식기본정보요청(code)
+        # result = hts.kiwoom_TR_OPT10080_주식분봉차트조회(code, 1, 0, data_lenth, 0)
 
         # Wait for response
-        while not hts.dict_stock[code]:
-            time.sleep(SLEEP_TIME)
+        # while not hts.result['result']:
+        #     time.sleep(SLEEP_TIME)
 
-        result = hts.dict_stock[code]
+        # odata = {
+        #     "date": int(result["체결시간"]),
+        #     "current" : int(result["현재가"]),
+        #     "open" : int(result["시가"]),
+        #     "high" : int(result["고가"]),
+        #     "low" : int(result["저가"]),
+        #     "volume": int(result["거래량"])
+        # }
+        # chart_data = {'date':[], 'current':[], 'open':[], 'high':[], 'low':[], 'volume':[]}
+        # print(hts.result["result"])
 
-        odata = {
-            "name": result["종목명"],
-            "price": int(result["현재가"]),
-            "volume": int(result["거래량"])
-        }
+        # for key ,line in hts.result.items():
+
+
+        #     for line in info.items():
+        #         chart_data["date"].append(int(line["체결시간"]))
+        #         chart_data["current"].append(int(line["현재가"]))
+        #         chart_data["open"].append(int(line["시가"]))
+        #         chart_data["high"].append(int(line["고가"]))
+        #         chart_data["low"].append(int(line["저가"]))
+        #         chart_data["volume"].append(int(line["거래량"]))
+            # print(hts.result)
+        
+       
+        # print(chart_data)
+
+        path = os.path.join(settings.BASE_DIR, f'data/stocks/{code}.csv')
+        PriceHandler.getStockData(self, code)
+        chart = pd.read_csv(path, thousands=',', header=None, names=data_manager.COLUMNS_CHART_DATA,
+        converters={'date': lambda x: str(x)})
+
+        chart_data = chart.to_json(chart.json, orient = "table")
+
         logger.debug("Response to client:")
-        logger.debug(str(odata))
-        self.write(odata)
+        logger.debug(str(chart_data))
+        self.write(json.dumps(chart_data))
 
 
 class OrderHandler(RequestHandler):

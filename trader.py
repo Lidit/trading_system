@@ -4,10 +4,12 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5 import uic
 
+import threading
 import time
 
 from pandas import DataFrame
 import datetime
+import os
 
 from crawler_api import PyMon
 from kiwoom_api import *
@@ -19,29 +21,52 @@ import tensorflow as tf
 graph = tf.get_default_graph()
 sess = tf.compat.v1.Session()
 
+import collections
+from environment import Environment
+from agent import Agent
+from visualizer import Visualizer
+
 class Trader:
-    def __init__(self, value_network=None, stock_code =None, min_trading_unit=1, max_trading_unit=2
-    net, value_network_path=None, policy_network_path=None, balance = 10000000):
-        os.environ['KERAS_BACKEND'] = backend
-        # 로그, Keras Backend 설정을 먼저하고 RLTrader 모듈들을 이후에 임포트해야 함
-        from agent import Agent
-        from learners import DQNLearner, PolicyGradientLearner, ActorCriticLearner, A2CLearner, A3CLearner
-        
+    def __init__(self, chart_data = None, value_network=None, stock_code =None, num_steps=1, min_trading_unit=1, max_trading_unit=2,
+    value_network_path=None, policy_network_path=None, balance = 10000000, delayed_reward_threshold =.05):
+
+        # 인자 확인
+        assert min_trading_unit > 0
+        assert max_trading_unit > 0
+        assert max_trading_unit >= min_trading_unit
+        assert num_steps > 0
+
+        # 환경 설정
+        self.stock_code = stock_code
+        self.chart_data = chart_data
         self.environment = Environment(chart_data)
+        self.training_data = None
 
         self.agent = Agent(self.environment,
-                    min_trading_unit=min_trading_unit,
-                    max_trading_unit=max_trading_unit,
-                    delayed_reward_threshold=delayed_reward_threshold)
+            min_trading_unit=min_trading_unit,
+            max_trading_unit=max_trading_unit,
+            delayed_reward_threshold=delayed_reward_threshold)
+
+        self.visualizer = Visualizer()
+
+        # 메모리
+        self.memory_sample = []
+        self.memory_action = []
+        self.memory_reward = []
+        self.memory_value = []
+        self.memory_policy = []
+        self.memory_pv = []
+        self.memory_num_stocks = []
+        self.memory_exp_idx = []
+        self.memory_learning_idx = []
 
         self.balance = balance
 
-        self.value_network_path = value_network_path
-        self.policy_network_path = policy_network_path
+        self.value_network = self.value_network.load_model(model_path = value_network_path)
+        self.policy_network = self.policy_network.load_model(model_path = policy_network_path)
 
-        self.value_network = load_model(model_path=self.value_network_path)
-        self.policy_network = load_model(model_path=self.policy_network_path)
 
+       
     def build_sample(self):
         self.environment.observe()
         if len(self.training_data) > self.training_data_idx + 1:
@@ -51,6 +76,9 @@ class Trader:
             self.sample.extend(self.agent.get_states())
             return self.sample
         return None
+        
+   
+
 
     def reset(self):
         self.sample = None
@@ -72,10 +100,78 @@ class Trader:
         self.memory_exp_idx = []
         self.memory_learning_idx = []
 
-    def trade():
+
+    def trade(self):
         q_sample = collections.deque(maxlen=1)
         self.reset()
-        while( int(str(datetime.now().hour) + str(datetime.now().minute)) < 1531 ):        
+
+        while( int(str(datetime.now().hour) + str(datetime.now().minute)) < 1531 && int(str(datetime.now().hour) + str(datetime.now().minute)) > 900 ):        
+            
             next_sample = self.build_sample()
             q_sample.append(next_sample)
             pred_value = self.value_network.predict(list(q_sample))
+            pred_policy = self.policy_network.predict(list(q_sample))
+
+            # 신경망 또는 탐험에 의한 행동 결정
+            action, confidence, exploration = self.agent.decide_action( pred_value, pred_policy, epsilon)
+
+            # 결정한 행동을 수행하고 즉시 보상과 지연 보상 획득
+            immediate_reward, delayed_reward = self.agent.act(action, confidence)
+
+             # 행동 결정에 따른 거래 요청
+            if action == 0:
+                data = {
+                "accno": "8133856511"
+                "qty": self.agent.max_trading_unit,
+                "price": 0,
+                "code": self.stock_code,
+                "type": "market",
+                }
+                resp = requests.post(self.balance_url, json=data)
+                result = resp.json()
+            elif action == 1:
+                data = {
+                "accno": "8133856511"
+                "qty": self.agent.max_trading_unit,
+                "price": 0,
+                "code": self.stock_code,
+                "type": "market",
+                }
+                resp = requests.post(self.balance_url, json=data)
+                result = resp.json()
+
+            # 행동 및 행동에 대한 결과를 기억
+            self.memory_sample.append(list(q_sample))
+            self.memory_action.append(action)
+            self.memory_reward.append(immediate_reward)
+            if self.value_network is not None:
+                self.memory_value.append(pred_value)
+            if self.policy_network is not None:
+                self.memory_policy.append(pred_policy)
+            self.memory_pv.append(self.agent.portfolio_value)
+            self.memory_num_stocks.append(self.agent.num_stocks)
+            if exploration:
+                self.memory_exp_idx.append(self.training_data_idx)
+
+            # 지연 보상 발생된 경우 미니 배치 학습
+            # if learning and (delayed_reward != 0):
+            #     self.fit(delayed_reward, discount_factor)
+        # 거래 정보 로그 기록
+            num_epoches_digit = int(str(datetime.now().hour) + str(datetime.now().minute))
+            epoch_str = str(epoch + 10).rjust(num_epoches_digit, '0')
+            time_end_epoch = time.time()
+            elapsed_time_epoch = time_end_epoch - time_start_epoch
+            if self.learning_cnt > 0:
+                self.loss /= self.learning_cnt
+            logging.info("[{}][Epoch {}/{}] Epsilon:{:.4f} "
+                "#Expl.:{}/{} #Buy:{} #Sell:{} #Hold:{} "
+                "#Stocks:{} PV:{:,.0f} "
+                "LC:{} Loss:{:.6f} ET:{:.4f}".format(
+                    self.stock_code, epoch_str, num_epoches, epsilon, 
+                    self.exploration_cnt, self.itr_cnt,
+                    self.agent.num_buy, self.agent.num_sell, 
+                    self.agent.num_hold, self.agent.num_stocks, 
+                    self.agent.portfolio_value, self.learning_cnt, 
+                    self.loss, elapsed_time_epoch))
+        
+        self.visualize(str(time_end_epoch), num_epoches, epsilon)
