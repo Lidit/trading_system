@@ -24,7 +24,7 @@ import decorator
 import os
 from PyQt5.QtWidgets import QApplication
 
-SLEEP_TIME = 0.34
+SLEEP_TIME = 0.2
 TR_REQ_TIME_INTERVAL = 0.2
 
 STOCK_DATA_PATH = f'{os.path.dirname(os.path.abspath(__file__))}/data/stocks'
@@ -103,6 +103,8 @@ class PriceHandler(RequestHandler):
         hts.dict_stock[code] = {}
         data_lenth = 750
         # Make request
+        PriceHandler.getStockData(self, code)
+
         # result = hts.kiwoom_TR_OPT10080_주식분봉차트조회(code, 1, 0, data_lenth, 0)
 
         # Wait for response
@@ -135,16 +137,17 @@ class PriceHandler(RequestHandler):
        
         # print(chart_data)
 
-        path = os.path.join(settings.BASE_DIR, f'data/stocks/{code}.csv')
-        PriceHandler.getStockData(self, code)
-        chart = pd.read_csv(path, thousands=',', header=None, names=data_manager.COLUMNS_CHART_DATA,
-        converters={'date': lambda x: str(x)})
+        # path = os.path.join(settings.BASE_DIR, f'data/stocks/{code}.csv')
+        # chart = pd.read_csv(path, thousands=',', header=None, names=data_manager.COLUMNS_CHART_DATA,
+        # converters={'date': lambda x: str(x)})
 
-        chart_data = chart.to_json(chart.json, orient = "table")
+        # chart_data = chart.to_json(chart.json, orient = "table")
+
+        
 
         logger.debug("Response to client:")
-        logger.debug(str(chart_data))
-        self.write(json.dumps(chart_data))
+        logger.debug("request success")
+        self.write(json.dumps("request success"))
 
 
 class OrderHandler(RequestHandler):

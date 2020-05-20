@@ -26,6 +26,8 @@ from environment import Environment
 from agent import Agent
 from visualizer import Visualizer
 
+import requests
+
 class Trader:
     def __init__(self, chart_data = None, value_network=None, stock_code =None, num_steps=1, min_trading_unit=1, max_trading_unit=2,
     value_network_path=None, policy_network_path=None, balance = 10000000, delayed_reward_threshold =.05):
@@ -68,6 +70,15 @@ class Trader:
 
        
     def build_sample(self):
+        self.chart_data = chart_data
+        self.environment = Environment(chart_data)
+        self.training_data = None
+
+        self.agent = Agent(self.environment,
+            min_trading_unit=min_trading_unit,
+            max_trading_unit=max_trading_unit,
+            delayed_reward_threshold=delayed_reward_threshold)
+            
         self.environment.observe()
         if len(self.training_data) > self.training_data_idx + 1:
             self.training_data_idx += 1
@@ -102,11 +113,14 @@ class Trader:
 
 
     def trade(self):
-        q_sample = collections.deque(maxlen=1)
-        self.reset()
 
-        while( int(str(datetime.now().hour) + str(datetime.now().minute)) < 1531 && int(str(datetime.now().hour) + str(datetime.now().minute)) > 900 ):        
-            
+        q_sample = collections.deque(maxlen=1)
+        
+        self.reset()
+        
+        while True:
+            if int( str(datetime.now().hour) + str(datetime.now().minute) ) < 1531 && int(str(datetime.now().hour) + str(datetime.now().minute)) >= 900:
+                break
             next_sample = self.build_sample()
             q_sample.append(next_sample)
             pred_value = self.value_network.predict(list(q_sample))
@@ -175,3 +189,49 @@ class Trader:
                     self.loss, elapsed_time_epoch))
         
         self.visualize(str(time_end_epoch), num_epoches, epsilon)
+
+
+if __name__ == "__main__":
+    balance_url = "127.0.0.1:5000/balance"
+    price_url = "127.0.0.1:5000/price"
+    order_url = "127.0.0.1:5000/order"
+    
+    # account_num = "8133856511"
+    stock_code = 108230
+    cash = requests.post(balance_url, data={"accno" :  "8133856511" }, None)
+    balance = cash["cash"]
+
+    # 모델 경로 준비
+    value_network_path = os.path.join(settings.BASE_DIR,
+                                              f'models\{value_network_name}.h5')
+    policy_network_path = os.path.join(settings.BASE_DIR,
+                                               'models\{}.h5'.format(policy_network_name))
+
+     # 공통 파라미터 설정
+    chart_data, training_data = data_manager.load_data(stock_code, start_date, end_date)
+
+    min_trading_unit = max(
+            int(1000000 / chart_data.iloc[-1]['current']), 1)
+    max_trading_unit = max(
+             int(10000000 / chart_data.iloc[-1]['current']), 1)
+    common_params = {'stock_code': stock_code,
+                    'delayed_reward_threshold': delayed_reward_threshold,
+                    'net': net, 
+                    'num_steps': num_steps,
+                    'balance' : balance,
+                    'output_path': output_path,
+                    'min_trading_unit': min_trading_unit, 
+                    'max_trading_unit': max_trading_unit,
+                    'chart_data': chart_data,
+                    'training_data': training_data
+                    }
+
+    
+    # 거래 시작
+    trader = None
+
+    trader =Trader(**{common_params})
+
+    
+
+    
