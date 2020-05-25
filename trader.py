@@ -8,7 +8,7 @@ import threading
 import time
 
 from pandas import DataFrame
-import datetime
+from datetime import datetime
 import os
 import settings
 backend = 'tensorflow'
@@ -35,12 +35,13 @@ from kiwoom_api import *
 # sess = tf.compat.v1.Session()
 
 import collections
-from environment import Environment
+from environment import Environment, RealTimeEnvironment
 from agent import Agent
 from visualizer import Visualizer
 import data_manager
 
 import requests
+import json
 
 class Trader:
     def __init__(self, chart_data = None, training_data=None, stock_code =None, num_steps=1, min_trading_unit=1, max_trading_unit=2,
@@ -59,7 +60,7 @@ class Trader:
         self.training_data_idx = -1
         self.stock_code = stock_code
         self.chart_data = chart_data
-        self.environment = Environment(chart_data)
+        self.environment = RealTimeEnvironment(chart_data)
         self.environment.observe()
         # print(self.environment.observe())
         self.training_data = training_data
@@ -82,7 +83,13 @@ class Trader:
         self.memory_exp_idx = []
         self.memory_learning_idx = []
 
-        self.balance = 9986883
+        self.num_hold = 0
+        #
+        cash = requests.post(balance_url, json={"accno" :  "8133856511" }, headers=None )
+        time.sleep(0.34)
+        balance = cash.json()
+        self.balance = balance["cash"]
+        
         self.agent.set_balance(self.balance)
         self.agent.reset()
         print(self.agent.portfolio_value)
@@ -114,26 +121,31 @@ class Trader:
        
     def build_sample(self):
         # self.chart_data = chart_data
-        chart_data, training_data = data_manager.load_data(stock_code, "20200512090000", "20200520135000")
-        self.environment = Environment(chart_data)
+
+        # 샘플한번 만들때마다 차트 데이터 갱신
+        chart_data, training_data = data_manager.load_data(stock_code, "20200525090000", "20200525163000")
+        self.chart_data = chart_data
+        self.environment.set_chart_data(chart_data)
         self.environment.observe()
 
-        self.agent = Agent(self.environment,
-            min_trading_unit=min_trading_unit,
-            max_trading_unit=max_trading_unit,
-            delayed_reward_threshold=0.05)
-        self.balance = 9986883
-        self.agent.set_balance(self.balance)
-        self.agent.reset()
-        # self.agent.environment.observe()
+        # self.agent = Agent(self.environment,
+        #     min_trading_unit=min_trading_unit,
+        #     max_trading_unit=max_trading_unit,
+        #     delayed_reward_threshold=0.05)
         
-        if len(training_data) > self.training_data_idx + 1:
-            self.training_data_idx += 1
-            self.sample = training_data.iloc[
-                self.training_data_idx].tolist()
-            self.sample.extend(self.agent.get_states())
-            return self.sample
-        return None
+        # 잔고를 실시간으로 강제 갱신
+        cash = requests.post(balance_url, json={"accno" :  "8133856511" }, headers=None )
+        time.sleep(0.34)
+        balance = cash.json()
+        self.balance = balance["cash"]
+        # self.agent.set_balance(self.balance) ?? 몬가 이상해 지민아... 암튼 이거 쫌 아닌거 같아서 주석함
+        self.agent.balance = self.balance
+        
+        
+        self.sample = training_data.iloc[-1].tolist()
+        self.sample.extend(self.agent.get_states())
+        return self.sample
+        
         
    
 
@@ -142,9 +154,9 @@ class Trader:
         self.sample = None
         self.training_data_idx = -1
         # 환경 초기화
-        self.environment.reset()
+        # self.environment.reset()
         # 에이전트 초기화
-        self.agent.reset()
+        # self.agent.reset()
         # 가시화 초기화
         # self.visualizer.clear([0, len(self.chart_data)])
         # 메모리 초기화
@@ -168,7 +180,11 @@ class Trader:
         
         while True:
             # self.reset()
-            time_start_epoch = time.time()
+            # time_start_epoch = time.time() 시간기록 어케 해둬보셈
+
+            # 매 정각? 정분? 마다 액션 수행
+            if datetime.today().second != "00" :
+                continue
             next_sample = self.build_sample()
             q_sample.append(next_sample)
             pred_value = self.value_network.predict(list(q_sample))
@@ -181,26 +197,33 @@ class Trader:
             immediate_reward, delayed_reward = self.agent.act(action, confidence)
 
              # 행동 결정에 따른 거래 요청
-            if action == 0:
+            if action == Agent.ACTION_BUY:
+                print("매수 합니다~")
                 data = {
                 "accno": "8133856511",
-                "qty": self.agent.max_trading_unit,
+                "qty": self.agent.decide_trading_unit(confidence),
                 "price": 0,
                 "code": self.stock_code,
                 "type": "market",
                 }
-                resp = requests.post(self.order_url, data=data)
-                result = resp.json()
-            elif action == 1:
+                resp = requests.post(self.order_url, data=json.dumps(data))
+                # data = resp.json()
+                
+            elif action == Agent.ACTION_SELL:
+                print("매도 합니다~")
                 data = {
                 "accno": "8133856511",
-                "qty": self.agent.max_trading_unit,
+                "qty": -(self.agent.decide_trading_unit(confidence)), 
                 "price": 0,
                 "code": self.stock_code,
-                "type": "market",
+                "type": "market"
                 }
-                resp = requests.post(self.order_url, data=data)
-                result = resp.json()
+                resp = requests.post(self.order_url, data=json.dumps(data))
+                time.sleep(0.34)
+                # data = resp.json()
+            elif action == Agent.ACTION_HOLD:
+                print("관망 합니다아~")
+                self.num_hold += 1
 
             # 행동 및 행동에 대한 결과를 기억
             self.memory_sample.append(list(q_sample))
@@ -218,7 +241,7 @@ class Trader:
             # 지연 보상 발생된 경우 미니 배치 학습
             # if learning and (delayed_reward != 0):
             #     self.fit(delayed_reward, discount_factor)
-        # 거래 정보 로그 기록
+            # 거래 정보 로그 기록
             # num_epoches_digit = int(str(datetime.now().hour) + str(datetime.now().minute))
             # epoch_str = str(10).rjust(num_epoches_digit, '0')
             # time_end_epoch = time.time()
@@ -241,13 +264,16 @@ class Trader:
 
 if __name__ == "__main__":
 
-    
+    price_url = "http://127.0.0.1:5550/price"
     balance_url = "http://127.0.0.1:5550/balance"
     # account_num = "8133856511"
     stock_code = 108230
-    keys = {'k1': 'v1', 'k2': 'v2'}
+    # keys = {'k1': 'v1', 'k2': 'v2'}
+
+    
+    # 초기 현금잔고 init
     cash = requests.post(balance_url, json={"accno" :  "8133856511" }, headers=None )
-    time.sleep(0.2)
+    time.sleep(0.34)
     cash = cash.json()
     balance = cash['cash']
 
@@ -262,13 +288,23 @@ if __name__ == "__main__":
     policy_network_path = os.path.join(settings.BASE_DIR,
                                                'models/a2c_lstm_policy_20200513043216.h5')
 
-
+    
      # 공통 파라미터 설정
-    chart_data, training_data = data_manager.load_data(stock_code, "20200512090000", "20200520135000")
+    
+    # 키움 서버에서 차트 데이터 갱신해 저장하기
+    price = requests.post(price_url, json={"code" :  stock_code }, headers=None )
+    while not price.json():
+        time.sleep(0.34)
+    print(price.json())
+
+    # 갱신된 차트 데이터 불러오기
+    # chart_data, training_data 매일매일 일자 갱신 수동으로 할필요없게 수정 부탁함
+    chart_data, training_data = data_manager.load_data(stock_code, "20200525090000", "20200525163000")
     
     # print(chart_data)
     # print(training_data)
-    
+   
+
     min_trading_unit = max(
             int(1000000 / chart_data.iloc[-1]['current']), 1)
     max_trading_unit = max(

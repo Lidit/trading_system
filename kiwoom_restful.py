@@ -37,7 +37,7 @@ class PriceHandler(RequestHandler):
     def __init__(self, application, request, **kwargs):
         super().__init__(application, request, **kwargs)
         self.event = None
-        self.kw = kwm()
+        
     
     def wait_response(self, price):
         self.event.set()
@@ -45,45 +45,33 @@ class PriceHandler(RequestHandler):
     def getStockData(self, stock_code) :
     
         stock_code = stock_code
-        # tick_unit = "분봉"
-        tick_range = 1
-        # base_date = datetime.datetime.today().strftime("%Y%m%d%H%M%S")
-
-        # start_datetime = datetime.datetime.fromordinal(self.startDateDateEdit.date().toPyDate().toordinal())
-        # end_dateitme = time.localtime(time.time())
+        tick_range = 1 # 1분틱 받기
         
-        # end_date = time.localtime(time.time())
+        # 매일 일자 자동 갱신되게 수정좀
+        start_date = "20200519090000"
+        end_date = "20200526160000"
 
 
-        # end_date = time.strftime("%Y%m%d%H%M00",time.localtime(time.time()) )
-        # start_datetime = end_date - timedelta(days=5)
-        # start_date = time.strftime("%Y%m%d%H%M00", start_datetime)
+        kw.set_input_value("종목코드", stock_code)
+        kw.set_input_value("틱범위", tick_range)
+        kw.set_input_value("수정주가구분", 1)
+        kw.comm_rq_data("opt10080_req", "opt10080", 0, "0101")
 
-        # end_datetime = datetime.datetime.fromordinal(self.endDateDateEdit.date().toPyDate().toordinal())
+        ohlcv = kw.ohlcv
 
-        start_date = "20200512090000"
-        end_date = "20200519160000"
-
-
-        self.kw.set_input_value("종목코드", stock_code)
-        self.kw.set_input_value("틱범위", tick_range)
-        self.kw.set_input_value("수정주가구분", 1)
-        self.kw.comm_rq_data("opt10080_req", "opt10080", 0, "0101")
-
-        ohlcv = self.kw.ohlcv
-
-        while self.kw.remained_data == True:
+        while kw.remained_data == True:
             time.sleep(TR_REQ_TIME_INTERVAL)
             if ohlcv['date'][-1] < start_date:
                 break
-            self.return_stats_msg = "분봉 받는중..."
-            self.kw.set_input_value("종목코드", stock_code)
-            self.kw.set_input_value("틱범위", tick_range)
-            self.kw.set_input_value("수정주가구분", 1)
-            self.kw.comm_rq_data("opt10080_req", "opt10080", 2, "0101")
-            for key, val in self.kw.ohlcv.items():
+            print("데이터 받는중~")
+            kw.set_input_value("종목코드", stock_code)
+            kw.set_input_value("틱범위", tick_range)
+            kw.set_input_value("수정주가구분", 1)
+            kw.comm_rq_data("opt10080_req", "opt10080", 2, "0101")
+            for key, val in kw.ohlcv.items():
                 ohlcv[key][-1:] = val
 
+        print("데이터 받기완료. 저장하기~")
         df = pd.DataFrame(ohlcv, columns=['date','current', 'open', 'high', 'low', 'volume'])
         df = df[df.date >= start_date]
         df = df.sort_values(by=['date'], axis=0)
@@ -98,13 +86,14 @@ class PriceHandler(RequestHandler):
         "code": symbol (aka code) of the stock
         """
         data = tornado.escape.json_decode(self.request.body)
+        logger.debug("PriceHandler: incoming")
+        logger.debug(data)
 
         code = data["code"]
         hts.dict_stock[code] = {}
-        data_lenth = 750
         # Make request
         PriceHandler.getStockData(self, code)
-
+        time.sleep(0.34)
         # result = hts.kiwoom_TR_OPT10080_주식분봉차트조회(code, 1, 0, data_lenth, 0)
 
         # Wait for response
@@ -256,7 +245,12 @@ def shutdown():
 # Shared variables
 #
 app = QApplication(sys.argv)
+
+# 잔고조회, 주문용 키움 클래스
 hts = Kiwoom()
+
+# 데이터용 키움 클래스 
+kw = kwm() # 서버에서 사용할 키움 클래스 생성은 클래스 밖에서, QApplication 뒤에 생성후 사용해야 안멈추는거였다.... 
 
 if __name__ == "__main__":
     # login

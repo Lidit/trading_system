@@ -72,8 +72,8 @@ class Agent:
 
     def get_states(self):
         self.environment.observe()
-        print(self.environment.get_price())
-        print(self.portfolio_value)
+        print("현재 evironment에서 인식하는 가격: %d", self.environment.get_price())
+        print("현재 포트폴리오 가치: %d ", self.portfolio_value)
         self.ratio_hold = self.num_stocks / int(
             self.portfolio_value / self.environment.get_price())
         self.ratio_portfolio_value = (
