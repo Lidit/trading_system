@@ -92,6 +92,7 @@ class Trader:
         
         self.agent.set_balance(self.balance)
         self.agent.reset()
+
         print(self.agent.portfolio_value)
         print(self.agent.balance)
         print(self.agent.initial_balance)
@@ -123,9 +124,13 @@ class Trader:
         # self.chart_data = chart_data
 
         # 샘플한번 만들때마다 차트 데이터 갱신
-        chart_data, training_data = data_manager.load_data(stock_code, "20200525090000", "20200525163000")
+        price = requests.post(price_url, json={"code" :  stock_code }, headers=None )
+        while not price.json():
+            time.sleep(0.34)
+        chart_data, training_data = data_manager.load_data(stock_code, "20200526090000", "20200526163000")
         self.chart_data = chart_data
-        self.environment.set_chart_data(chart_data)
+        self.environment.set_chart_data(self.chart_data)
+        self.agent.environment.set_chart_data(self.chart_data)
         self.environment.observe()
 
         # self.agent = Agent(self.environment,
@@ -138,8 +143,9 @@ class Trader:
         time.sleep(0.34)
         balance = cash.json()
         self.balance = balance["cash"]
-        # self.agent.set_balance(self.balance) ?? 몬가 이상해 지민아... 암튼 이거 쫌 아닌거 같아서 주석함
+        # self.agent.set_balance(self.balance) # ?? 몬가 이상해 지민아... 암튼 이거 쫌 아닌거 같아서 주석함
         self.agent.balance = self.balance
+        self.agent.environment.set_chart_data(self.chart_data)
         
         
         self.sample = training_data.iloc[-1].tolist()
@@ -175,7 +181,6 @@ class Trader:
 
         q_sample = collections.deque(maxlen=1)
         
-        self.reset()
         
         
         while True:
@@ -183,21 +188,26 @@ class Trader:
             # time_start_epoch = time.time() 시간기록 어케 해둬보셈
 
             # 매 정각? 정분? 마다 액션 수행
-            if datetime.today().second != "00" :
-                continue
+            # if datetime.today().second != "00" :
+            #     continue
+
             next_sample = self.build_sample()
             q_sample.append(next_sample)
-            pred_value = self.value_network.predict(list(q_sample))
-            pred_policy = self.policy_network.predict(list(q_sample))
+            pred_value = self.value_network.predict(list(q_sample)[-1])
+            pred_policy = self.policy_network.predict(list(q_sample)[-1])
 
             # 신경망 또는 탐험에 의한 행동 결정
             action, confidence, exploration = self.agent.decide_action( pred_value, pred_policy, 0)
 
             # 결정한 행동을 수행하고 즉시 보상과 지연 보상 획득
             immediate_reward, delayed_reward = self.agent.act(action, confidence)
-
+            print(action)
+            if not self.agent.validate_action(action):
+                action = Agent.ACTION_HOLD
+            print(action)
+            print(self.agent.num_stocks)
              # 행동 결정에 따른 거래 요청
-            if action == Agent.ACTION_BUY:
+            if action == 0:
                 print("매수 합니다~")
                 data = {
                 "accno": "8133856511",
@@ -207,9 +217,10 @@ class Trader:
                 "type": "market",
                 }
                 resp = requests.post(self.order_url, data=json.dumps(data))
+                time.sleep(0.34)
                 # data = resp.json()
                 
-            elif action == Agent.ACTION_SELL:
+            elif action == 1:
                 print("매도 합니다~")
                 data = {
                 "accno": "8133856511",
@@ -221,7 +232,7 @@ class Trader:
                 resp = requests.post(self.order_url, data=json.dumps(data))
                 time.sleep(0.34)
                 # data = resp.json()
-            elif action == Agent.ACTION_HOLD:
+            elif action == 2:
                 print("관망 합니다아~")
                 self.num_hold += 1
 
@@ -258,7 +269,7 @@ class Trader:
             #         self.agent.num_hold, self.agent.num_stocks, 
             #         self.agent.portfolio_value, self.learning_cnt, 
             #         self.loss, elapsed_time_epoch))
-        
+            time.sleep(55)
         # self.visualize(str(time_end_epoch), num_epoches, epsilon)
 
 
@@ -267,7 +278,7 @@ if __name__ == "__main__":
     price_url = "http://127.0.0.1:5550/price"
     balance_url = "http://127.0.0.1:5550/balance"
     # account_num = "8133856511"
-    stock_code = 108230
+    stock_code = "053300"
     # keys = {'k1': 'v1', 'k2': 'v2'}
 
     
@@ -284,9 +295,9 @@ if __name__ == "__main__":
     #                                            'models\{}.h5'.format(policy_network_name))
 
     value_network_path = os.path.join(settings.BASE_DIR,
-                                              'models/a2c_lstm_value_20200513043216.h5')
+                                              'models/a2c_lstm_value_20200526052844.h5')
     policy_network_path = os.path.join(settings.BASE_DIR,
-                                               'models/a2c_lstm_policy_20200513043216.h5')
+                                               'models/a2c_lstm_policy_20200526052844.h5')
 
     
      # 공통 파라미터 설정
@@ -299,7 +310,7 @@ if __name__ == "__main__":
 
     # 갱신된 차트 데이터 불러오기
     # chart_data, training_data 매일매일 일자 갱신 수동으로 할필요없게 수정 부탁함
-    chart_data, training_data = data_manager.load_data(stock_code, "20200525090000", "20200525163000")
+    chart_data, training_data = data_manager.load_data(stock_code, "20200526090000", "20200526163000")
     
     # print(chart_data)
     # print(training_data)

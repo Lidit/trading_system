@@ -47,13 +47,15 @@ class MainWindow(QMainWindow, form_class):
         num_steps = 1
         delayed_reward_threshold = 0.1
         backend = 'tensorflow'
-        value_network_name = "a2c_lstm_value_20200513043216.h5"
-        policy_network_name = "a2c_lstm_policy_20200513043216.h5"
+        # value_network_name = "a2c_lstm_value_20200513043216.h5"
+        # policy_network_name = "a2c_lstm_policy_20200513043216.h5"
+        value_network_name = ""
+        policy_network_name = ""
 
-        reuse_models = True
-        learning = False
-        start_date = "20200513090000"
-        end_date = "20200513153000"
+        reuse_models = False
+        learning = True
+        start_date = "20200519090000"
+        end_date = "20200525153000"
 
         os.environ['KERAS_BACKEND'] = backend
 
@@ -110,9 +112,9 @@ class MainWindow(QMainWindow, form_class):
         print(training_data)
         # 최소/최대 투자 단위 설정
         min_trading_unit = max(
-            int(100000 / chart_data.iloc[-1]['low']), 1)
+            int(100000 / chart_data.iloc[-1]['current']), 1)
         max_trading_unit = max(
-             int(1000000 / chart_data.iloc[-1]['low']), 1)
+             int(1000000 / chart_data.iloc[-1]['current']), 1)
 
         # # 최소/최대 투자 단위 설정
         # min_trading_unit = max(

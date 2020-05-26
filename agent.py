@@ -7,8 +7,8 @@ class Agent:
     STATE_DIM = 2  # 주식 보유 비율, 포트폴리오 가치 비율
 
     # 매매 수수료 및 세금
-    TRADING_CHARGE = 0.0003  # 거래 수수료 (일반적으로 0.015%)
-    TRADING_TAX = 0.005  # 거래세 (실제 0.25%)
+    TRADING_CHARGE = 0.0035  # 거래 수수료 (일반적으로 0.015%)
+    TRADING_TAX = 0.0025  # 거래세 (실제 0.25%)
     # TRADING_CHARGE = 0  # 거래 수수료 미적용
     # TRADING_TAX = 0  # 거래세 미적용
 
@@ -71,7 +71,7 @@ class Agent:
         self.initial_balance = balance
 
     def get_states(self):
-        self.environment.observe()
+        # self.environment.observe()
         print("현재 evironment에서 인식하는 가격: %d", self.environment.get_price())
         print("현재 포트폴리오 가치: %d ", self.portfolio_value)
         self.ratio_hold = self.num_stocks / int(

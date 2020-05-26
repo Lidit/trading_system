@@ -158,7 +158,7 @@ def load_data(stock_code, date_from, date_to):
     chart_data = data[COLUMNS_CHART_DATA]
     chart_data.reset_index(drop=True, inplace=True)
     
-    training_data = load_stock_index_data()
+    training_data = load_stock_data(stock_code)
     data_path = f'{default_training_dir}/3.custom_training_{stock_code}.csv'
     training_data.set_index(training_data['date'], inplace=True)
     training_data.drop(['date'], axis=1, inplace=True)
@@ -167,4 +167,4 @@ def load_data(stock_code, date_from, date_to):
 
 
 if  __name__ == "__main__":
-    load_data('032620', '20200507090000', '20200512153000')
+    load_data('108230', '20200519090000', '20200525153000')

@@ -71,12 +71,13 @@ class PriceHandler(RequestHandler):
             for key, val in kw.ohlcv.items():
                 ohlcv[key][-1:] = val
 
-        print("데이터 받기완료. 저장하기~")
+       
         df = pd.DataFrame(ohlcv, columns=['date','current', 'open', 'high', 'low', 'volume'])
         df = df[df.date >= start_date]
         df = df.sort_values(by=['date'], axis=0)
         df = df.reset_index(drop=True)
         df.to_csv(f'{STOCK_DATA_PATH}/{stock_code}.csv', mode='w', header=False)
+        print("데이터 받기완료. 저장하기~")
 
 
 
