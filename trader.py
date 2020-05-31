@@ -127,7 +127,7 @@ class Trader:
         price = requests.post(price_url, json={"code" :  stock_code }, headers=None )
         while not price.json():
             time.sleep(0.34)
-        chart_data, training_data = data_manager.load_data(stock_code, "20200526090000", "20200526163000")
+        chart_data, training_data = data_manager.load_data(stock_code, "20200528090000", "20200528163000")
         self.chart_data = chart_data
         self.environment.set_chart_data(self.chart_data)
         self.agent.environment.set_chart_data(self.chart_data)
@@ -278,7 +278,7 @@ if __name__ == "__main__":
     price_url = "http://127.0.0.1:5550/price"
     balance_url = "http://127.0.0.1:5550/balance"
     # account_num = "8133856511"
-    stock_code = "053300"
+    stock_code = "265520"
     # keys = {'k1': 'v1', 'k2': 'v2'}
 
     
@@ -310,7 +310,7 @@ if __name__ == "__main__":
 
     # 갱신된 차트 데이터 불러오기
     # chart_data, training_data 매일매일 일자 갱신 수동으로 할필요없게 수정 부탁함
-    chart_data, training_data = data_manager.load_data(stock_code, "20200526090000", "20200526163000")
+    chart_data, training_data = data_manager.load_data(stock_code, "20200528090000", "20200528163000")
     
     # print(chart_data)
     # print(training_data)
