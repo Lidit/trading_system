@@ -12,6 +12,7 @@ import json
 import pandas as pd
 import sys
 import time
+import asyncio
 import datetime
 from datetime import timedelta
 import data_manager
@@ -25,10 +26,10 @@ import os
 from PyQt5.QtWidgets import QApplication
 
 SLEEP_TIME = 0.2
-TR_REQ_TIME_INTERVAL = 0.2
+TR_REQ_TIME_INTERVAL = 0.5
 
-STOCK_DATA_PATH = f'{os.path.dirname(os.path.abspath(__file__))}/data/stocks'
-STOCK_INDEX_DATA_PATH = f'{os.path.dirname(os.path.abspath(__file__))}/data/stockIndex'
+STOCK_DATA_PATH = f'{os.path.dirname(os.path.abspath(__file__))}\data\stocks'
+STOCK_INDEX_DATA_PATH = f'{os.path.dirname(os.path.abspath(__file__))}\data\stockIndex'
 
 # @decorators.call_printer
 
@@ -43,10 +44,11 @@ class PriceHandler(RequestHandler):
         self.event.set()
     
     def getStockData(self, stock_code) :
-    
+        logger.debug("start getStockData")
         stock_code = stock_code
         tick_range = 1 # 1분틱 받기
         
+# <<<<<<< Updated upstream
         # 매일 일자 자동 갱신되게 수정좀
         start_date = "20200519090000"
         end_date = "20200526160000"
@@ -59,7 +61,30 @@ class PriceHandler(RequestHandler):
 
         ohlcv = kw.ohlcv
 
+        # while kw.remained_data == True:
+# =======
+        # end_date = time.localtime(time.time())
+
+        # end_date = time.strftime("%Y%m%d%H%M00",time.localtime(time.time()) )
+        # start_datetime = end_date - timedelta(days=5)
+        # start_date = time.strftime("%Y%m%d%H%M00", start_datetime)
+
+        # end_datetime = datetime.datetime.fromordinal(self.endDateDateEdit.date().toPyDate().toordinal())
+
+        start_date = "20200512090000"
+        end_date = "20200519160000"
+
+        time.sleep(TR_REQ_TIME_INTERVAL)
+        logger.debug("SET")
+        kw.set_input_value("종목코드", stock_code)
+        kw.set_input_value("틱범위", tick_range)
+        kw.set_input_value("수정주가구분", 1)
+        kw.comm_rq_data("opt10080_req", "opt10080", 0, "0101")
+        logger.debug("SET2")
+        ohlcv = kw.ohlcv
+
         while kw.remained_data == True:
+            logger.debug("loop")
             time.sleep(TR_REQ_TIME_INTERVAL)
             if ohlcv['date'][-1] < start_date:
                 break
@@ -71,17 +96,20 @@ class PriceHandler(RequestHandler):
             for key, val in kw.ohlcv.items():
                 ohlcv[key][-1:] = val
 
-       
-        df = pd.DataFrame(ohlcv, columns=['date','current', 'open', 'high', 'low', 'volume'])
+        df = pd.DataFrame(
+            ohlcv, columns=['date', 'current', 'open', 'high', 'low', 'volume'])
         df = df[df.date >= start_date]
         df = df.sort_values(by=['date'], axis=0)
         df = df.reset_index(drop=True)
-        df.to_csv(f'{STOCK_DATA_PATH}/{stock_code}.csv', mode='w', header=False)
+        df.to_csv(f'{STOCK_DATA_PATH}/{stock_code}.csv',
+                  mode='w', header=False)
         print("데이터 받기완료. 저장하기~")
+        logger.debug("getStockData success")
 
 
-
+    @tornado.gen.coroutine
     def post(self):
+        logger.debug("start post")
         """
         request data must contain
         "code": symbol (aka code) of the stock

@@ -43,8 +43,11 @@ import data_manager
 import requests
 import json
 
+#accno 8136846611 한지민
+#accno 8133856511
+
 class Trader:
-    def __init__(self, chart_data = None, training_data=None, stock_code =None, num_steps=1, min_trading_unit=1, max_trading_unit=2,
+    def __init__(self, gui_window = None, chart_data = None, training_data=None, stock_code =None, num_steps=1, min_trading_unit=1, max_trading_unit=2,
     value_network_path=None, policy_network_path=None, balance = 9986883, delayed_reward_threshold =.05):
 
         # 인자 확인
@@ -57,6 +60,7 @@ class Trader:
         self.order_url = "http://127.0.0.1:5550/order"
 
         # 환경 설정
+        self.gui_window = gui_window
         self.training_data_idx = -1
         self.stock_code = stock_code
         self.chart_data = chart_data
@@ -85,18 +89,21 @@ class Trader:
 
         self.num_hold = 0
         #
-        cash = requests.post(balance_url, json={"accno" :  "8133856511" }, headers=None )
+        cash = requests.post(self.balance_url, json={"accno" :  "8136846611" }, headers=None )
         time.sleep(0.34)
         balance = cash.json()
         self.balance = balance["cash"]
         
         self.agent.set_balance(self.balance)
         self.agent.reset()
-
+        
         print(self.agent.portfolio_value)
         print(self.agent.balance)
         print(self.agent.initial_balance)
         # self.agent.set_balance(balance)
+        self.gui_window.tradeLogTextBrowser.append(f'{self.agent.portfolio_value}')
+        self.gui_window.tradeLogTextBrowser.append(f'{self.agent.balance}')
+        self.gui_window.tradeLogTextBrowser.append(f'{self.agent.initial_balance}')
 
         self.num_features = self.agent.STATE_DIM
         if self.training_data is not None:
@@ -124,10 +131,10 @@ class Trader:
         # self.chart_data = chart_data
 
         # 샘플한번 만들때마다 차트 데이터 갱신
-        price = requests.post(price_url, json={"code" :  stock_code }, headers=None )
+        price = requests.post(self.price_url, json={"code" :  self.stock_code }, headers=None )
         while not price.json():
             time.sleep(0.34)
-        chart_data, training_data = data_manager.load_data(stock_code, "20200528090000", "20200528163000")
+        chart_data, training_data = data_manager.load_data(self.stock_code, "20200528090000", "20200528163000")
         self.chart_data = chart_data
         self.environment.set_chart_data(self.chart_data)
         self.agent.environment.set_chart_data(self.chart_data)
@@ -138,8 +145,9 @@ class Trader:
         #     max_trading_unit=max_trading_unit,
         #     delayed_reward_threshold=0.05)
         
+        
         # 잔고를 실시간으로 강제 갱신
-        cash = requests.post(balance_url, json={"accno" :  "8133856511" }, headers=None )
+        cash = requests.post(self.balance_url, json={"accno" :  "8136846611" }, headers=None )
         time.sleep(0.34)
         balance = cash.json()
         self.balance = balance["cash"]
@@ -151,10 +159,6 @@ class Trader:
         self.sample = training_data.iloc[-1].tolist()
         self.sample.extend(self.agent.get_states())
         return self.sample
-        
-        
-   
-
 
     def reset(self):
         self.sample = None
@@ -208,9 +212,10 @@ class Trader:
             print(self.agent.num_stocks)
              # 행동 결정에 따른 거래 요청
             if action == 0:
+                self.gui_window.tradeLogTextBrowser.append("매수 합니다~")
                 print("매수 합니다~")
                 data = {
-                "accno": "8133856511",
+                "accno": "8136846611",
                 "qty": self.agent.decide_trading_unit(confidence),
                 "price": 0,
                 "code": self.stock_code,
@@ -221,9 +226,10 @@ class Trader:
                 # data = resp.json()
                 
             elif action == 1:
+                self.gui_window.tradeLogTextBrowser.append("매도 합니다~")
                 print("매도 합니다~")
                 data = {
-                "accno": "8133856511",
+                "accno": "8136846611",
                 "qty": -(self.agent.decide_trading_unit(confidence)), 
                 "price": 0,
                 "code": self.stock_code,
@@ -233,6 +239,7 @@ class Trader:
                 time.sleep(0.34)
                 # data = resp.json()
             elif action == 2:
+                self.gui_window.tradeLogTextBrowser.append("관망 합니다아~")
                 print("관망 합니다아~")
                 self.num_hold += 1
 
@@ -283,7 +290,7 @@ if __name__ == "__main__":
 
     
     # 초기 현금잔고 init
-    cash = requests.post(balance_url, json={"accno" :  "8133856511" }, headers=None )
+    cash = requests.post(balance_url, json={"accno" :  "8136846611" }, headers=None )
     time.sleep(0.34)
     cash = cash.json()
     balance = cash['cash']
@@ -306,7 +313,8 @@ if __name__ == "__main__":
     price = requests.post(price_url, json={"code" :  stock_code }, headers=None )
     while not price.json():
         time.sleep(0.34)
-    print(price.json())
+    
+    
 
     # 갱신된 차트 데이터 불러오기
     # chart_data, training_data 매일매일 일자 갱신 수동으로 할필요없게 수정 부탁함
@@ -336,6 +344,7 @@ if __name__ == "__main__":
     # 거래 시작
 
     trader = Trader(**common_params)
+    trader.gui_window.tradeLogTextBrowser.append(price.json())
     trader.trade()
 
     
