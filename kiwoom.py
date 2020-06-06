@@ -96,7 +96,7 @@ class Kiwoom(QAxWidget):
         self.setControl("KHOPENAPI.KHOpenAPICtrl.1")
         self.OnEventConnect.connect(self.kiwoom_OnEventConnect)
         self.OnReceiveTrData.connect(self.kiwoom_OnReceiveTrData)
-        # self.OnReceiveRealData.connect(self.kiwoom_OnReceiveRealData)
+        self.OnReceiveRealData.connect(self.kiwoom_OnReceiveRealData)
         # self.OnReceiveConditionVer.connect(self.kiwoom_OnReceiveConditionVer)
         # self.OnReceiveTrCondition.connect(self.kiwoom_OnReceiveTrCondition)
         # self.OnReceiveRealCondition.connect(self.kiwoom_OnReceiveRealCondition)
@@ -298,7 +298,19 @@ class Kiwoom(QAxWidget):
         res = self.kiwoom_SetInputValue("계좌번호", 계좌번호)
         res = self.kiwoom_CommRqData("예수금상세현황요청", "opw00001", 0, 화면번호)
         return res
+    
+    @SyncRequestDecorator.kiwoom_sync_request
+    def kiwoom_TR_OPT10075_실시간미체결요청(self, 계좌번호, **kwargs):
+        """실시간미체결요청
+        :param 계좌번호: 계좌번호
+        :param kwargs:
+        :retrun:
+        """
 
+        res = self.kiwoom_SetInputValue("계좌번호", 계좌번호)
+        res = self.kiwoom_CommRqData("실시간미체결요청", "opt10075", 0, 화면번호)
+        return res
+    
     @SyncRequestDecorator.kiwoom_sync_callback
     def kiwoom_OnReceiveTrData(self, sScrNo, sRQName, sTRCode, sRecordName, sPreNext, nDataLength, sErrorCode, sMessage,
                                sSPlmMsg, **kwargs):
@@ -327,7 +339,14 @@ class Kiwoom(QAxWidget):
             logger.debug("예수금상세현황요청: %s" % (self.int_주문가능금액,))
             if "예수금상세현황요청" in self.dict_callback:
                 self.dict_callback["예수금상세현황요청"](self.int_주문가능금액)
-
+        elif sRQName == "실시간미체결요청":
+            d = {}
+            d['num'] = self.kiwoom_GetCommData(sTRCode, sRQName, 0, "주문번호")
+            d['code'] = self.kiwoom_GetCommData(sTRCode, sRQName, 0, "종목코드")
+            d['state'] = self.kiwoom_GetCommData(sTRCode, sRQName, 0, "주문상태")
+            d['price'] = self.kiwoom_GetCommData(sTRCode, sRQName, 0, "주문가격")
+            result = f'실시간 미체결 요청 : {d}'
+            logger.debug(result)
         elif sRQName == "주식기본정보":
             cnt = self.kiwoom_GetRepeatCnt(sTRCode, sRQName)
             list_item_name = ["종목명", "현재가", "등락율", "거래량"]

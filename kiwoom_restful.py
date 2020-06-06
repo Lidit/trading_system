@@ -252,14 +252,29 @@ class BalanceHandler(RequestHandler):
         logger.debug("Response to client:")
         logger.debug(str(result))
         self.write(json.dumps(result))
-    
 
+class DataHandler(RequestHandler):
+    def post(self):
+        """
+        Request data must contain
+        accno : account number the transaction will happen
+        """
+        data = tornado.escape.json_decode(self.request.body)
+        logger.debug("DataHandler: incoming")
+        logger.debug(data)
+
+        result = hts.kiwoom_TR_OPT10075_실시간미체결요청(data["accno"])
+
+        logger.debug("Response to client:")
+        logger.debug(str(result))
+        self.write(json.dumps(result))    
 
 def make_app():
     urls = [
         ("/price", PriceHandler),
         ("/order", OrderHandler),
         ("/balance", BalanceHandler),
+        ("/data", DataHandler),
     ]
     # Autoreload seems troublesome.
     return Application(urls, debug=True, autoreload=False)

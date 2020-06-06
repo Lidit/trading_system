@@ -21,6 +21,13 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
+    <item row="1" column="0">
+     <widget class="QPushButton" name="exitButton">
+      <property name="text">
+       <string>강제종료</string>
+      </property>
+     </widget>
+    </item>
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
@@ -41,17 +48,24 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="LineEdit"/>
+           <widget class="QLineEdit" name="stockCodeLineEdit"/>
           </item>
          </layout>
         </item>
-        <item row="2" column="0">
+        <item row="7" column="0">
          <widget class="QTextBrowser" name="tradeLogTextBrowser"/>
         </item>
-        <item row="1" column="0">
+        <item row="2" column="0">
          <widget class="QPushButton" name="startTradeButton">
           <property name="text">
-           <string>거래시작</string>
+           <string>거래 시작</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QPushButton" name="stopTradeButton">
+          <property name="text">
+           <string>거래 종료</string>
           </property>
          </widget>
         </item>
@@ -107,7 +121,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QPushButton" name="pushButton_2">
+         <widget class="QPushButton" name="requestDataButton">
           <property name="text">
            <string>체결조회</string>
           </property>
@@ -119,14 +133,8 @@
        <attribute name="title">
         <string>잔고확인</string>
        </attribute>
+       <layout class="QFormLayout" name="formLayout_2"/>
       </widget>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QPushButton" name="pushButton">
-      <property name="text">
-       <string>강제종료</string>
-      </property>
      </widget>
     </item>
    </layout>
@@ -137,7 +145,7 @@
      <x>0</x>
      <y>0</y>
      <width>1052</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
