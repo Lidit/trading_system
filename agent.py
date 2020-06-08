@@ -22,7 +22,8 @@ class Agent:
 
     def __init__(
         self, environment, min_trading_unit=1, max_trading_unit=2, 
-        delayed_reward_threshold=.05):
+        delayed_reward_threshold=.05, gui_window = None):
+        self.gui_window = gui_window
         # Environment 객체
         # 현재 주식 가격을 가져오기 위해 환경 참조
         self.environment = environment
@@ -72,8 +73,9 @@ class Agent:
 
     def get_states(self):
         # self.environment.observe()
-        print("현재 evironment에서 인식하는 가격: %d", self.environment.get_price())
-        print("현재 포트폴리오 가치: %d ", self.portfolio_value)
+        self.printLog(f'"현재 evironment에서 인식하는 가격: " {self.environment.get_price()}')
+        self.printLog(f'"현재 포트폴리오 가치: " {self.portfolio_value}')
+
         self.ratio_hold = self.num_stocks / int(
             self.portfolio_value / self.environment.get_price())
         self.ratio_portfolio_value = (
@@ -223,3 +225,7 @@ class Agent:
             delayed_reward = 0
 
         return self.immediate_reward, delayed_reward
+
+    def printLog(self, log):
+        if self.gui_window is not None:
+            self.gui_window.tradeLogTextBrowser.append(f'{log}')

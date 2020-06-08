@@ -1,6 +1,3 @@
-
-
-
 # def start(self):
 #         self.task.setThread(self.a, state = 'learning', stock_code = self.gui.stockCodeLineEdit.text())
 #         self.task.start()
@@ -33,14 +30,19 @@ class TaskThread(QThread):
 
     def setThread(self, func, **kwargs):
         self.func = func
+        self.stock_code = kwargs.get('stock_code')
         # if 'state' in kwargs:
         #     stock_code = kwargs.get('stock_code')
         #     print(f'stock code : {stock_code}')
         # for key, value in kwargs.items():
         #     print(f'{key} : {value}')
     
+    def stopThread(self):
+        print("exit")
+        exit()
+    
     def run(self):
-        self.func()
+        self.func(self.stock_code)
 
 ui_path = f'{os.path.dirname(os.path.abspath(__file__))}/ui/trader_ui.ui'
 form_class = uic.loadUiType(ui_path)[0]
@@ -50,22 +52,38 @@ class MainWindow(QMainWindow, form_class):
         super().__init__()
         self.setupUi(self)
         self.startTradeButton.clicked.connect(self.startTrade)
-    
-    def startTrade(self):
-        self.thread = TaskThread()
-        self.thread.setThread(self.startTradeThread)
-        self.thread.start()
+        self.stopTradeButton.clicked.connect(self.stopTrade)
+        self.requestDataButton.clicked.connect(self.requestData)
+        self.exitButton.clicked.connect(self.exitEvent)
+        self.data_url = "http://127.0.0.1:5550/data"
 
-    def startTradeThread(self):
+    def exitEvent(self):
+        exit()
+
+    def requestData(self):
+        result = requests.post(self.data_url, json={"accno" :  "8133856511" }, headers=None )
+        print(result.json())
+
+    def stopTrade(self):
+        self.tradeThread.stopThread()
+        self.tradeLogTextBrowser.append(f'trade 종료')
+
+    def startTrade(self):
+        self.tradeLogTextBrowser.append(f'trade 시작')
+        self.tradeThread = TaskThread()
+        self.tradeThread.setThread(self.startTradeThread, stock_code=self.stockCodeLineEdit.text())
+        self.tradeThread.start()
+
+    def startTradeThread(self, stock_code):
         price_url = "http://127.0.0.1:5550/price"
         balance_url = "http://127.0.0.1:5550/balance"
         # account_num = "8133856511"
-        stock_code = "265520"
+        stock_code = stock_code #265520
         # keys = {'k1': 'v1', 'k2': 'v2'}
 
         
         # 초기 현금잔고 init
-        cash = requests.post(balance_url, json={"accno" :  "8136846611" }, headers=None )
+        cash = requests.post(balance_url, json={"accno" :  "8133856511" }, headers=None )
         time.sleep(0.34)
         cash = cash.json()
         balance = cash['cash']
@@ -120,7 +138,7 @@ class MainWindow(QMainWindow, form_class):
 
         trader = Trader(**common_params)
         trader.trade()
-
+    
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

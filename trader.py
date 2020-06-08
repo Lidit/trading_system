@@ -72,7 +72,8 @@ class Trader:
         self.agent = Agent(self.environment,
             min_trading_unit=min_trading_unit,
             max_trading_unit=max_trading_unit,
-            delayed_reward_threshold=delayed_reward_threshold)
+            delayed_reward_threshold=delayed_reward_threshold,
+            gui_window=gui_window)
 
         self.visualizer = Visualizer()
 
@@ -89,7 +90,7 @@ class Trader:
 
         self.num_hold = 0
         #
-        cash = requests.post(self.balance_url, json={"accno" :  "8136846611" }, headers=None )
+        cash = requests.post(self.balance_url, json={"accno" :  "8133856511" }, headers=None )
         time.sleep(0.34)
         balance = cash.json()
         self.balance = balance["cash"]
@@ -100,10 +101,10 @@ class Trader:
         print(self.agent.portfolio_value)
         print(self.agent.balance)
         print(self.agent.initial_balance)
-        # self.agent.set_balance(balance)
-        self.gui_window.tradeLogTextBrowser.append(f'{self.agent.portfolio_value}')
-        self.gui_window.tradeLogTextBrowser.append(f'{self.agent.balance}')
-        self.gui_window.tradeLogTextBrowser.append(f'{self.agent.initial_balance}')
+
+        self.printLog(self.agent.portfolio_value)
+        self.printLog(self.agent.balance)
+        self.printLog(self.agent.initial_balance)
 
         self.num_features = self.agent.STATE_DIM
         if self.training_data is not None:
@@ -147,7 +148,7 @@ class Trader:
         
         
         # 잔고를 실시간으로 강제 갱신
-        cash = requests.post(self.balance_url, json={"accno" :  "8136846611" }, headers=None )
+        cash = requests.post(self.balance_url, json={"accno" :  "8133856511" }, headers=None )
         time.sleep(0.34)
         balance = cash.json()
         self.balance = balance["cash"]
@@ -205,17 +206,25 @@ class Trader:
 
             # 결정한 행동을 수행하고 즉시 보상과 지연 보상 획득
             immediate_reward, delayed_reward = self.agent.act(action, confidence)
+            
             print(action)
+            self.printLog(action)
+            
             if not self.agent.validate_action(action):
                 action = Agent.ACTION_HOLD
+            
             print(action)
+            self.printLog(action)
+
             print(self.agent.num_stocks)
+            self.printLog(self.agent.num_stocks)
+
              # 행동 결정에 따른 거래 요청
             if action == 0:
-                self.gui_window.tradeLogTextBrowser.append("매수 합니다~")
+                self.printLog("매수 합니다~")
                 print("매수 합니다~")
                 data = {
-                "accno": "8136846611",
+                "accno": "8133856511",
                 "qty": self.agent.decide_trading_unit(confidence),
                 "price": 0,
                 "code": self.stock_code,
@@ -226,10 +235,10 @@ class Trader:
                 # data = resp.json()
                 
             elif action == 1:
-                self.gui_window.tradeLogTextBrowser.append("매도 합니다~")
+                self.printLog("매도 합니다~")
                 print("매도 합니다~")
                 data = {
-                "accno": "8136846611",
+                "accno": "8133856511",
                 "qty": -(self.agent.decide_trading_unit(confidence)), 
                 "price": 0,
                 "code": self.stock_code,
@@ -239,7 +248,7 @@ class Trader:
                 time.sleep(0.34)
                 # data = resp.json()
             elif action == 2:
-                self.gui_window.tradeLogTextBrowser.append("관망 합니다아~")
+                self.printLog("관망 합니다아~")
                 print("관망 합니다아~")
                 self.num_hold += 1
 
@@ -279,6 +288,8 @@ class Trader:
             time.sleep(55)
         # self.visualize(str(time_end_epoch), num_epoches, epsilon)
 
+    def printLog(self, log):
+        self.gui_window.tradeLogTextBrowser.append(f'{log}')
 
 if __name__ == "__main__":
 
@@ -290,7 +301,7 @@ if __name__ == "__main__":
 
     
     # 초기 현금잔고 init
-    cash = requests.post(balance_url, json={"accno" :  "8136846611" }, headers=None )
+    cash = requests.post(balance_url, json={"accno" :  "8133856511" }, headers=None )
     time.sleep(0.34)
     cash = cash.json()
     balance = cash['cash']
@@ -344,7 +355,7 @@ if __name__ == "__main__":
     # 거래 시작
 
     trader = Trader(**common_params)
-    trader.gui_window.tradeLogTextBrowser.append(price.json())
+    trader.printLog(price.json())
     trader.trade()
 
     
