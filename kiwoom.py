@@ -360,7 +360,7 @@ class Kiwoom(QAxWidget):
             self.dict_stock[종목코드] = dict_stock
             logger.debug("주식기본정보: %s, %s" % (종목코드, dict_stock))
             if "주식기본정보" in self.dict_callback:
-                self.dict_callback["주식기본정보"](dict_stock)
+                self.dict_callback["주식기본정보"] = self.dict_stock
 
         elif sRQName == "시세표성정보":
             cnt = self.kiwoom_GetRepeatCnt(sTRCode, sRQName)
@@ -700,7 +700,7 @@ class Kiwoom(QAxWidget):
         """주문성공, 실패 메시지
         :param sScrNo: 화면번호
         :param sRQName: 사용자 구분명
-        :param sTrCode: TR이름
+        :param sTrCode: TR이름                    
         :param sMsg: 서버에서 전달하는 메시지
         :param kwargs:
         :return:

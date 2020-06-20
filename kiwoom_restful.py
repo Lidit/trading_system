@@ -247,6 +247,7 @@ class BalanceHandler(RequestHandler):
         result = {}
         for code, info in hts.dict_holding.items():
             result[code] = int(info["보유수량"])
+            
         result["cash"] = cash
 
         logger.debug("Response to client:")

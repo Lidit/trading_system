@@ -13,6 +13,8 @@ import sys
 import logging
 import argparse
 import json
+import datetime
+from datetime import timedelta
 
 import settings
 import utils
@@ -69,6 +71,17 @@ class MainWindow(QMainWindow, form_class):
         self.tradeLogTextBrowser.append(f'trade 종료')
 
     def startTrade(self):
+        
+        now = datetime.now()
+        pastDate = now - timedelta(days=5)
+        pastTime = datetime.time(0, 0, 0)
+        print(pastTime)
+        #pastDateTime = datetime.datetime.combine(pastDate, pastTime)
+        print(pastDateTime)
+
+        print(f'{now.year}{now.month}{now.day}163000')
+        "20200528090000", "20200528163000"
+        return
         self.tradeLogTextBrowser.append(f'trade 시작')
         self.tradeThread = TaskThread()
         self.tradeThread.setThread(self.startTradeThread, stock_code=self.stockCodeLineEdit.text())
