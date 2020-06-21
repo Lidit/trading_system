@@ -18,6 +18,12 @@ ui_path = f'{os.path.dirname(os.path.abspath(__file__))}/ui/training_main.ui'
 form_class = uic.loadUiType(ui_path)[0]
 
 
+#일진 다이아 081000
+#톱텍 108230
+#삼성sdi 006400
+#ap 시스템 265520
+#유비케어 032620
+
 class MainWindow(QMainWindow, form_class):
     def __init__(self):
         super().__init__()
