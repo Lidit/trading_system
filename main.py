@@ -36,8 +36,8 @@ if __name__ == '__main__':
     parser.add_argument('--policy_network_name')
     parser.add_argument('--reuse_models', action='store_true')
     parser.add_argument('--learning', action='store_true')
-    parser.add_argument('--start_date', default='20200615')
-    parser.add_argument('--end_date', default='20200619')
+    parser.add_argument('--start_date', default='20200615090000')
+    parser.add_argument('--end_date', default='20200619160000')
     args = parser.parse_args()
 
     # Keras Backend 설정
@@ -97,7 +97,6 @@ if __name__ == '__main__':
         # 차트 데이터, 학습 데이터 준비
         chart_data, training_data = data_manager.load_data(stock_code, 
             args.start_date, args.end_date)
-        
         # 최소/최대 투자 단위 설정
         min_trading_unit = max(
             int(100000 / chart_data.iloc[-1]['current']), 1)
