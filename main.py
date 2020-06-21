@@ -36,8 +36,8 @@ if __name__ == '__main__':
     parser.add_argument('--policy_network_name')
     parser.add_argument('--reuse_models', action='store_true')
     parser.add_argument('--learning', action='store_true')
-    parser.add_argument('--start_date', default='20090101')
-    parser.add_argument('--end_date', default='20181231')
+    parser.add_argument('--start_date', default='20200615')
+    parser.add_argument('--end_date', default='20200619')
     args = parser.parse_args()
 
     # Keras Backend 설정
@@ -111,44 +111,44 @@ if __name__ == '__main__':
         #      int(1000000 / chart_data.iloc[-1]['close']), 1)
 
          # 공통 파라미터 설정
-        common_params = {'rl_method': rl_method,
-                           'delayed_reward_threshold': delayed_reward_threshold,
-                           'net': net, 'num_steps': num_steps, 'lr': lr,
+        common_params = {'rl_method': args.rl_method,
+                           'delayed_reward_threshold': args.delayed_reward_threshold,
+                           'net': args.net, 'num_steps': args.num_steps, 'lr': args.lr,
                              'output_path': output_path,
-                             'reuse_models': reuse_models}
+                             'reuse_models': args.reuse_models}
 
         # 강화학습 시작
         learner = None
 
-        if rl_method != 'a3c':
+        if args.rl_method != 'a3c':
             common_params.update({'stock_code': stock_code,
                                     'chart_data': chart_data,
                                     'training_data': training_data,
                                     'min_trading_unit': min_trading_unit, 
                                     'max_trading_unit': max_trading_unit})
 
-            if rl_method == 'dqn':
+            if args.rl_method == 'dqn':
                 learner = DQNLearner(**{**common_params,
                                         'value_network_path': value_network_path})
-            elif rl_method == 'pg':
+            elif args.rl_method == 'pg':
                 learner = PolicyGradientLearner(**{**common_params,
                                                     'policy_network_path': policy_network_path})
-            elif rl_method == 'ac':
+            elif args.rl_method == 'ac':
                 learner = ActorCriticLearner(**{
                     **common_params,
                     'value_network_path': value_network_path,
                     'policy_network_path': policy_network_path})
-            elif rl_method == 'a2c':
+            elif args.rl_method == 'a2c':
                 learner = A2CLearner(**{
                     **common_params,
                     'value_network_path': value_network_path,
                     'policy_network_path': policy_network_path})
             if learner is not None:
-                learner.run(balance=balance,
-                            num_epoches=num_epoches,
-                            discount_factor=discount_factor,
-                            start_epsilon=start_epsilon,
-                            learning=learning)
+                learner.run(balance=args.balance,
+                            num_epoches=args.num_epoches,
+                            discount_factor=args.discount_factor,
+                            start_epsilon=args.start_epsilon,
+                            learning=args.learning)
                 learner.save_models()
         else:
             list_stock_code.append(stock_code)
@@ -157,7 +157,7 @@ if __name__ == '__main__':
             list_min_trading_unit.append(min_trading_unit)
             list_max_trading_unit.append(max_trading_unit)
 
-        if rl_method == 'a3c':
+        if args.rl_method == 'a3c':
             learner = A3CLearner(**{
                 **common_params,
                 'list_stock_code': list_stock_code,
@@ -168,10 +168,9 @@ if __name__ == '__main__':
                 'value_network_path': value_network_path,
                 'policy_network_path': policy_network_path})
 
-            learner.run(balance=balance, num_epoches=num_epoches,
-                        discount_factor=discount_factor,
-                        start_epsilon=start_epsilon,
-                        learning=learning)
+            learner.run(balance=args.balance, num_epoches=args.num_epoches,
+                        discount_factor=args.discount_factor,
+                        start_epsilon=args.start_epsilon,
+                        learning=args.learning)
             learner.save_models()
-        self.startLearningButton.setEnabled(True)
 
