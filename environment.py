@@ -49,4 +49,3 @@ class RealTimeEnvironment():
 
     def set_chart_data(self, chart_data):
         self.chart_data = chart_data
-    
