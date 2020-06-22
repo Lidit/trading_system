@@ -6,7 +6,7 @@ import threading
 import time
 import numpy as np
 from utils import sigmoid
-from Environment import Environment
+from environment import Environment
 from agent import Agent
 from networks import Network, DNN, LSTMNetwork, CNN
 from visualizer import Visualizer

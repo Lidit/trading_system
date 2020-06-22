@@ -167,4 +167,4 @@ def load_data(stock_code, date_from, date_to):
 
 
 if  __name__ == "__main__":
-    load_data('108230', '20200519090000', '20200525153000')
+    load_data('081000', '20200615090000', '20200619153000')
