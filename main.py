@@ -92,8 +92,11 @@ if __name__ == '__main__':
     list_training_data = []
     list_min_trading_unit = []
     list_max_trading_unit = []
-
+    print(args.stock_code)
     for stock_code in args.stock_code:
+
+        print(stock_code)
+
         # 차트 데이터, 학습 데이터 준비
         chart_data, training_data = data_manager.load_data(stock_code, 
             args.start_date, args.end_date)
