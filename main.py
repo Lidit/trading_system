@@ -156,20 +156,20 @@ if __name__ == '__main__':
             list_min_trading_unit.append(min_trading_unit)
             list_max_trading_unit.append(max_trading_unit)
 
-        if args.rl_method == 'a3c':
-            learner = A3CLearner(**{
-                **common_params,
-                'list_stock_code': list_stock_code,
-                'list_chart_data': list_chart_data,
-                'list_training_data': list_training_data,
-                'list_min_trading_unit': list_min_trading_unit,
-                'list_max_trading_unit': list_max_trading_unit,
-                'value_network_path': value_network_path,
-                'policy_network_path': policy_network_path})
+    if args.rl_method == 'a3c':
+        learner = A3CLearner(**{
+            **common_params,
+            'list_stock_code': list_stock_code,
+            'list_chart_data': list_chart_data,
+            'list_training_data': list_training_data,
+            'list_min_trading_unit': list_min_trading_unit,
+            'list_max_trading_unit': list_max_trading_unit,
+            'value_network_path': value_network_path,
+            'policy_network_path': policy_network_path})
 
-            learner.run(balance=args.balance, num_epoches=args.num_epoches,
-                        discount_factor=args.discount_factor,
-                        start_epsilon=args.start_epsilon,
-                        learning=args.learning)
-            learner.save_models()
+        learner.run(balance=args.balance, num_epoches=args.num_epoches,
+                    discount_factor=args.discount_factor,
+                    start_epsilon=args.start_epsilon,
+                    learning=args.learning)
+        learner.save_models()
 

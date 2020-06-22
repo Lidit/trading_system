@@ -53,35 +53,34 @@ class MainWindow(QMainWindow, form_class):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        self.startTradeButton.clicked.connect(self.startTrade)
-        self.stopTradeButton.clicked.connect(self.stopTrade)
-        self.requestDataButton.clicked.connect(self.requestData)
-        self.exitButton.clicked.connect(self.exitEvent)
+
+        #depositLineEdit
+        #availableLineEdit
+        #stockCodeLineEdit
+        #currentStockLineEdit
+        #volumeLineEdit
+        #inputStockCodeLineEdit
+
+        #startTradePushButton
+        #stopTradePushButton
+        #shutdownPushButton
+
+        #logTextBrowser
+
+        # self.startTradeButton.clicked.connect(self.startTrade)
+        # self.stopTradeButton.clicked.connect(self.stopTrade)
+        # self.requestDataButton.clicked.connect(self.requestData)
+        # self.exitButton.clicked.connect(self.exitEvent)
         self.data_url = "http://127.0.0.1:5550/data"
 
     def exitEvent(self):
         exit()
-
-    def requestData(self):
-        result = requests.post(self.data_url, json={"accno" :  "8133856511" }, headers=None )
-        print(result.json())
 
     def stopTrade(self):
         self.tradeThread.stopThread()
         self.tradeLogTextBrowser.append(f'trade 종료')
 
     def startTrade(self):
-        
-        now = datetime.now()
-        pastDate = now - timedelta(days=5)
-        pastTime = datetime.time(0, 0, 0)
-        print(pastTime)
-        #pastDateTime = datetime.datetime.combine(pastDate, pastTime)
-        print(pastDateTime)
-
-        print(f'{now.year}{now.month}{now.day}163000')
-        "20200528090000", "20200528163000"
-        return
         self.tradeLogTextBrowser.append(f'trade 시작')
         self.tradeThread = TaskThread()
         self.tradeThread.setThread(self.startTradeThread, stock_code=self.stockCodeLineEdit.text())
