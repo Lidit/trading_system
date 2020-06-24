@@ -1,5 +1,6 @@
 class Environment:
-    PRICE_IDX = 2  # 종가의 위치 (현재가의 위치)
+    PRICE_IDX = 1  # 종가의 위치 (현재가의 위치)
+    VALUE_IDX = -1 # 거래량의 위치
 
     def __init__(self, chart_data=None):
         self.chart_data = chart_data
@@ -22,12 +23,18 @@ class Environment:
         if self.observation is not None:
             return self.observation[self.PRICE_IDX]
         return None
+    
+    def get_value(self):
+        if self.observation is not None:
+            return self.observation[self.VALUE_IDX]
+        return None
 
     def set_chart_data(self, chart_data):
         self.chart_data = chart_data
 
 class RealTimeEnvironment():
-    PRICE_IDX = 2 # 실시간 가격의 위치
+    PRICE_IDX = 1 # 실시간 가격의 위치
+    VALUE_IDX = -1 # 거래량의 위치
 
     def __init__(self, chart_data = None):
         self.chart_data = chart_data
@@ -44,7 +51,13 @@ class RealTimeEnvironment():
     
     def get_price(self):
         if self.observation is not None:
+            print(self.observation)
             return self.observation[self.PRICE_IDX]
+        return None
+
+    def get_value(self):
+        if self.observation is not None:
+            return self.observation[self.VALUE_IDX]
         return None
 
     def set_chart_data(self, chart_data):

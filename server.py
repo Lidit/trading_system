@@ -74,7 +74,7 @@ class PriceHandler(RequestHandler):
     @tornado.gen.coroutine
     def post(self):
         data = tornado.escape.json_decode(self.request.body)
-        
+        print(data)
         code = data["code"]
         tick = data["tick"]
         start_date = data["start_date"]

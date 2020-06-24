@@ -228,4 +228,4 @@ class Agent:
 
     def printLog(self, log):
         if self.gui_window is not None:
-            self.gui_window.tradeLogTextBrowser.append(f'{log}')
+            self.gui_window.logTextBrowser.append(f'{log}')

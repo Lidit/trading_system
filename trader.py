@@ -8,9 +8,12 @@ import threading
 import time
 
 from pandas import DataFrame
-from datetime import datetime
+
 import os
 import settings
+import datetime
+from datetime import timedelta
+
 backend = 'tensorflow'
 os.environ['KERAS_BACKEND'] = backend
 from tensorflow.keras.models import Model
@@ -90,21 +93,13 @@ class Trader:
 
         self.num_hold = 0
         #
-        cash = requests.post(self.balance_url, json={"accno" :  "8133856511" }, headers=None )
+        cash = requests.post(self.balance_url, json={}, headers=None )
         time.sleep(0.34)
         balance = cash.json()
         self.balance = balance["cash"]
         
         self.agent.set_balance(self.balance)
         self.agent.reset()
-        
-        print(self.agent.portfolio_value)
-        print(self.agent.balance)
-        print(self.agent.initial_balance)
-
-        self.printLog(self.agent.portfolio_value)
-        self.printLog(self.agent.balance)
-        self.printLog(self.agent.initial_balance)
 
         self.num_features = self.agent.STATE_DIM
         if self.training_data is not None:
@@ -126,16 +121,27 @@ class Trader:
                 activation='sigmoid', loss='binary_crossentropy')
         self.policy_network.load_model(model_path = policy_network_path)
 
-
        
     def build_sample(self):
         # self.chart_data = chart_data
+        
+        start_date = datetime.datetime.now() - datetime.timedelta(days=5)
+        start_date = datetime.datetime.combine(start_date, datetime.time(9,0))
+        end_date = datetime.datetime.combine(datetime.datetime.now(), datetime.time(16,0))
 
         # 샘플한번 만들때마다 차트 데이터 갱신
-        price = requests.post(self.price_url, json={"code" :  self.stock_code }, headers=None )
+        price = requests.post(self.price_url, json={"code" :  self.stock_code, 
+                                                "tick" : 1, 
+                                                "start_date" : start_date.strftime("%Y%m%d%H%M%S"), 
+                                                "end_date" : end_date.strftime("%Y%m%d%H%M%S")
+                                                }, 
+                                                headers=None)
         while not price.json():
-            time.sleep(0.34)
-        chart_data, training_data = data_manager.load_data(self.stock_code, "20200528090000", "20200528163000")
+            time.sleep(0.1)
+
+        self.printLog('차트 정보 갱신')
+
+        chart_data, training_data = data_manager.load_data(self.stock_code, start_date.strftime("%Y%m%d%H%M%S"), end_date.strftime("%Y%m%d%H%M%S"))
         self.chart_data = chart_data
         self.environment.set_chart_data(self.chart_data)
         self.agent.environment.set_chart_data(self.chart_data)
@@ -148,14 +154,20 @@ class Trader:
         
         
         # 잔고를 실시간으로 강제 갱신
-        cash = requests.post(self.balance_url, json={"accno" :  "8133856511" }, headers=None )
+        cash = requests.post(self.balance_url, json={}, headers=None )
         time.sleep(0.34)
         balance = cash.json()
         self.balance = balance["cash"]
+        
+        self.printLog('잔고 및 주식 정보 갱신')
+
+        self.gui_window.depositLineEdit.setText(f'{balance["cash"]}')
+        self.gui_window.currentStockLineEdit.setText(f'{self.environment.get_price()}')
+        self.gui_window.volumeLineEdit.setText(f'{self.environment.get_value()}')
+
         # self.agent.set_balance(self.balance) # ?? 몬가 이상해 지민아... 암튼 이거 쫌 아닌거 같아서 주석함
         self.agent.balance = self.balance
         self.agent.environment.set_chart_data(self.chart_data)
-        
         
         self.sample = training_data.iloc[-1].tolist()
         self.sample.extend(self.agent.get_states())
@@ -183,87 +195,79 @@ class Trader:
 
 
     def trade(self):
-
+        self.printLog(f'정보 업데이트 및 AI 판단 : {datetime.datetime.now().strftime("%Y%m%d%H%M%S")}')
         q_sample = collections.deque(maxlen=1)
         
         
-        
-        while True:
             # self.reset()
             # time_start_epoch = time.time() 시간기록 어케 해둬보셈
 
-            # 매 정각? 정분? 마다 액션 수행
-            # if datetime.today().second != "00" :
-            #     continue
+        next_sample = self.build_sample()
+        q_sample.append(next_sample)
+        pred_value = self.value_network.predict(list(q_sample)[-1])
+        pred_policy = self.policy_network.predict(list(q_sample)[-1])
 
-            next_sample = self.build_sample()
-            q_sample.append(next_sample)
-            pred_value = self.value_network.predict(list(q_sample)[-1])
-            pred_policy = self.policy_network.predict(list(q_sample)[-1])
+        # 신경망 또는 탐험에 의한 행동 결정
+        action, confidence, exploration = self.agent.decide_action( pred_value, pred_policy, 0)
 
-            # 신경망 또는 탐험에 의한 행동 결정
-            action, confidence, exploration = self.agent.decide_action( pred_value, pred_policy, 0)
-
-            # 결정한 행동을 수행하고 즉시 보상과 지연 보상 획득
-            immediate_reward, delayed_reward = self.agent.act(action, confidence)
+        # 결정한 행동을 수행하고 즉시 보상과 지연 보상 획득
+        immediate_reward, delayed_reward = self.agent.act(action, confidence)
             
-            print(action)
-            self.printLog(action)
+        print(action)
+        self.printLog(action)
             
-            if not self.agent.validate_action(action):
-                action = Agent.ACTION_HOLD
+        if not self.agent.validate_action(action):
+            action = Agent.ACTION_HOLD
             
-            print(action)
-            self.printLog(action)
+        print(action)
+        self.printLog(action)
 
-            print(self.agent.num_stocks)
-            self.printLog(self.agent.num_stocks)
+        print(self.agent.num_stocks)
+        self.printLog(self.agent.num_stocks)
 
-             # 행동 결정에 따른 거래 요청
-            if action == 0:
-                self.printLog("매수 합니다~")
-                print("매수 합니다~")
-                data = {
-                "accno": "8133856511",
-                "qty": self.agent.decide_trading_unit(confidence),
-                "price": 0,
-                "code": self.stock_code,
-                "type": "market",
-                }
-                resp = requests.post(self.order_url, data=json.dumps(data))
-                time.sleep(0.34)
-                # data = resp.json()
+        # 행동 결정에 따른 거래 요청
+        if action == 0:
+            self.printLog("매수 합니다~")
+            data = {
+            "qty": self.agent.decide_trading_unit(confidence),
+            "price": 0,
+            "code": self.stock_code,
+            "type": "market",
+            }
+            resp = requests.post(self.order_url, data=json.dumps(data))
+            time.sleep(0.34)
+            # data = resp.json()
                 
-            elif action == 1:
-                self.printLog("매도 합니다~")
-                print("매도 합니다~")
-                data = {
-                "accno": "8133856511",
-                "qty": -(self.agent.decide_trading_unit(confidence)), 
-                "price": 0,
-                "code": self.stock_code,
-                "type": "market"
-                }
-                resp = requests.post(self.order_url, data=json.dumps(data))
-                time.sleep(0.34)
-                # data = resp.json()
-            elif action == 2:
-                self.printLog("관망 합니다아~")
-                print("관망 합니다아~")
-                self.num_hold += 1
+        elif action == 1:
+            self.printLog("매도 합니다~")
+            data = {
+            "qty": -(self.agent.decide_trading_unit(confidence)), 
+            "price": 0,
+            "code": self.stock_code,
+            "type": "market"
+            }
+            resp = requests.post(self.order_url, data=json.dumps(data))
+            time.sleep(0.34)
+            # data = resp.json()
+        elif action == 2:
+            self.printLog("관망 합니다아~")
+            self.num_hold += 1
 
-            # 행동 및 행동에 대한 결과를 기억
-            self.memory_sample.append(list(q_sample))
-            self.memory_action.append(action)
-            self.memory_reward.append(immediate_reward)
-            if self.value_network is not None:
-                self.memory_value.append(pred_value)
-            if self.policy_network is not None:
-                self.memory_policy.append(pred_policy)
-            self.memory_pv.append(self.agent.portfolio_value)
-            self.memory_num_stocks.append(self.agent.num_stocks)
-            if exploration:
-                self.memory_exp_idx.append(self.training_data_idx)
+        # 행동 및 행동에 대한 결과를 기억
+        self.memory_sample.append(list(q_sample))
+        self.memory_action.append(action)
+        self.memory_reward.append(immediate_reward)
+
+        if self.value_network is not None:
+            self.memory_value.append(pred_value)
+        if self.policy_network is not None:
+            self.memory_policy.append(pred_policy)
+
+        self.memory_pv.append(self.agent.portfolio_value)
+        self.memory_num_stocks.append(self.agent.num_stocks)
+
+        if exploration:
+            self.memory_exp_idx.append(self.training_data_idx)
 
             # 지연 보상 발생된 경우 미니 배치 학습
             # if learning and (delayed_reward != 0):
@@ -285,11 +289,10 @@ class Trader:
             #         self.agent.num_hold, self.agent.num_stocks, 
             #         self.agent.portfolio_value, self.learning_cnt, 
             #         self.loss, elapsed_time_epoch))
-            time.sleep(55)
         # self.visualize(str(time_end_epoch), num_epoches, epsilon)
 
     def printLog(self, log):
-        self.gui_window.tradeLogTextBrowser.append(f'{log}')
+        self.gui_window.logTextBrowser.append(f'{log}')
 
 if __name__ == "__main__":
 
@@ -355,7 +358,6 @@ if __name__ == "__main__":
     # 거래 시작
 
     trader = Trader(**common_params)
-    trader.printLog(price.json())
     trader.trade()
 
     
