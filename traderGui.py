@@ -68,9 +68,9 @@ class MainWindow(QMainWindow, form_class):
         self.depositLineEdit.setText(f'{balance}')
 
         value_network_path = os.path.join(settings.BASE_DIR,
-                                                'models/20200623/a3c_lstm_value_081000_108230_006400_265520_032620.h5')
+                                                'models/20200623_a3c_lstm_value_081000_108230_006400_265520_032620.h5')
         policy_network_path = os.path.join(settings.BASE_DIR,
-                                                'models/20200623/a3c_lstm_policy_081000_108230_006400_265520_032620.h5')
+                                                'models/20200623_a3c_lstm_policy_081000_108230_006400_265520_032620.h5')
         
         # 공통 파라미터 설정
         

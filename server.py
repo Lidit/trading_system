@@ -123,6 +123,7 @@ class CurrentPriceHandler(RequestHandler):
 class OrderHandler(RequestHandler):
     request_no = 0
 
+    @tornado.gen.coroutine
     def post(self):
         """
         request data must hold the following:
@@ -173,6 +174,8 @@ class OrderHandler(RequestHandler):
             "" # original order number to cancel or correct.
         )
         logger.debug("Order sent.")
+        self.write(json.dumps("주문 완료"))
+        
 
 def make_app():
     urls = [

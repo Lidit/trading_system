@@ -36,8 +36,8 @@ if __name__ == '__main__':
     parser.add_argument('--policy_network_name')
     parser.add_argument('--reuse_models', action='store_true')
     parser.add_argument('--learning', action='store_true')
-    parser.add_argument('--start_date', default='20200616090000')
-    parser.add_argument('--end_date', default='20200619160000')
+    parser.add_argument('--start_date', default='20200625090000')
+    parser.add_argument('--end_date', default='20200625160000')
     args = parser.parse_args()
 
     # Keras Backend 설정
