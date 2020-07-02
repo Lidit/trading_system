@@ -96,11 +96,11 @@ class Kiwoom(QAxWidget):
         self.setControl("KHOPENAPI.KHOpenAPICtrl.1")
         self.OnEventConnect.connect(self.kiwoom_OnEventConnect)
         self.OnReceiveTrData.connect(self.kiwoom_OnReceiveTrData)
-        #self.OnReceiveRealData.connect(self.kiwoom_OnReceiveRealData)
+        # self.OnReceiveRealData.connect(self.kiwoom_OnReceiveRealData)
         # self.OnReceiveConditionVer.connect(self.kiwoom_OnReceiveConditionVer)
         # self.OnReceiveTrCondition.connect(self.kiwoom_OnReceiveTrCondition)
         # self.OnReceiveRealCondition.connect(self.kiwoom_OnReceiveRealCondition)
-        self.OnReceiveChejanData.connect(self.kiwoom_OnReceiveChejanData)
+        # self.OnReceiveChejanData.connect(self.kiwoom_OnReceiveChejanData)
         self.OnReceiveMsg.connect(self.kiwoom_OnReceiveMsg)
 
         # 파라미터
@@ -310,6 +310,17 @@ class Kiwoom(QAxWidget):
         res = self.kiwoom_SetInputValue("계좌번호", 계좌번호)
         res = self.kiwoom_CommRqData("실시간미체결요청", "opt10075", 0, 화면번호)
         return res
+
+    @SyncRequestDecorator.kiwoom_sync_request
+    def kiwoom_TR_OPW00018_계좌평가잔고내역요청(self, 계좌번호, **kwargs):
+        """계좌평가잔고내역요청
+        :param 계좌번호: 계좌번호
+        :param kwargs:
+        :return:
+        """
+        res = self.kiwoom_SetInputValue("계좌번호", 계좌번호)
+        res = self.kiwoom_CommRqData("계좌평가잔고내역요청", "opw00018", 0, 화면번호)
+        return res
     
     @SyncRequestDecorator.kiwoom_sync_callback
     def kiwoom_OnReceiveTrData(self, sScrNo, sRQName, sTRCode, sRecordName, sPreNext, nDataLength, sErrorCode, sMessage,
@@ -488,7 +499,8 @@ class Kiwoom(QAxWidget):
 
         elif sRQName == "계좌수익률요청":
             cnt = self.kiwoom_GetRepeatCnt(sTRCode, sRQName)
-            assert self.dict_holding is None # The request will set this to None.
+            #assert self.dict_holding is None # The request will set this to None.
+            self.dict_holding = {}
             result = {}
             for nIdx in range(cnt):
                 list_item_name = ["종목코드", "종목명", "현재가", "매입가", "보유수량"]
@@ -498,10 +510,14 @@ class Kiwoom(QAxWidget):
                 # 매입가를 총매입가로 키변경
                 dict_holding["총매입가"] = util.safe_cast(dict_holding["매입가"], int, 0)
                 dict_holding["보유수량"] = util.safe_cast(dict_holding["보유수량"], int, 0)
-                dict_holding["수익"] = (dict_holding["현재가"] - dict_holding["총매입가"]) * dict_holding["보유수량"]
+                dict_holding["수익"] = (dict_holding["현재가"] - dict_holding["총매입가"]) * dict_holding["보유수량"] #abs 처리 필요함
                 종목코드 = dict_holding["종목코드"]
+                
+                if(dict_holding["보유수량"] < 1):
+                    continue
+                
                 result[종목코드] = dict_holding
-                logger.debug("계좌수익: %s" % (dict_holding,))
+                # logger.debug("계좌수익: %s" % (dict_holding,))
             self.dict_holding = result
             if '계좌수익률요청' in self.dict_callback:
                 self.dict_callback['계좌수익률요청'](self.dict_holding)
