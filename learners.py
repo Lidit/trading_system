@@ -8,7 +8,7 @@ import numpy as np
 from utils import sigmoid
 from environment import Environment
 from agent import Agent
-from networks import Network, DNN, LSTMNetwork, CNN
+from networks import Network, LSTMNetwork
 from visualizer import Visualizer
 
 class ReinforcementLearner:
@@ -78,26 +78,14 @@ class ReinforcementLearner:
 
     def init_value_network(self, shared_network=None, 
             activation='linear', loss='mse'):
-        if self.net == 'dnn':
-            self.value_network = DNN(
-                input_dim=self.num_features, 
-                output_dim=self.agent.NUM_ACTIONS, 
-                lr=self.lr, shared_network=shared_network, 
-                activation=activation, loss=loss)
-        elif self.net == 'lstm':
+        if self.net == 'lstm':
             self.value_network = LSTMNetwork(
                 input_dim=self.num_features, 
                 output_dim=self.agent.NUM_ACTIONS, 
                 lr=self.lr, num_steps=self.num_steps, 
                 shared_network=shared_network, 
                 activation=activation, loss=loss)
-        elif self.net == 'cnn':
-            self.value_network = CNN(
-                input_dim=self.num_features, 
-                output_dim=self.agent.NUM_ACTIONS, 
-                lr=self.lr, num_steps=self.num_steps, 
-                shared_network=shared_network, 
-                activation=activation, loss=loss)
+        
         if self.reuse_models and \
             os.path.exists(self.value_network_path):
                 self.value_network.load_model(
@@ -105,26 +93,14 @@ class ReinforcementLearner:
 
     def init_policy_network(self, shared_network=None, 
             activation='sigmoid', loss='binary_crossentropy'):
-        if self.net == 'dnn':
-            self.policy_network = DNN(
-                input_dim=self.num_features, 
-                output_dim=self.agent.NUM_ACTIONS, 
-                lr=self.lr, shared_network=shared_network, 
-                activation=activation, loss=loss)
-        elif self.net == 'lstm':
+        if self.net == 'lstm':
             self.policy_network = LSTMNetwork(
                 input_dim=self.num_features, 
                 output_dim=self.agent.NUM_ACTIONS, 
                 lr=self.lr, num_steps=self.num_steps, 
                 shared_network=shared_network, 
                 activation=activation, loss=loss)
-        elif self.net == 'cnn':
-            self.policy_network = CNN(
-                input_dim=self.num_features, 
-                output_dim=self.agent.NUM_ACTIONS, 
-                lr=self.lr, num_steps=self.num_steps, 
-                shared_network=shared_network, 
-                activation=activation, loss=loss)
+        
         if self.reuse_models and \
             os.path.exists(self.policy_network_path):
             self.policy_network.load_model(
@@ -390,59 +366,6 @@ class ReinforcementLearner:
         if self.policy_network is not None and \
                 self.policy_network_path is not None:
             self.policy_network.save_model(self.policy_network_path)
-
-
-class DQNLearner(ReinforcementLearner):
-    def __init__(self, *args, value_network_path=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.value_network_path = value_network_path
-        self.init_value_network()
-
-    def get_batch(self, batch_size, delayed_reward, discount_factor):
-        memory = zip(
-            reversed(self.memory_sample[-batch_size:]),
-            reversed(self.memory_action[-batch_size:]),
-            reversed(self.memory_value[-batch_size:]),
-            reversed(self.memory_reward[-batch_size:]),
-        )
-        x = np.zeros((batch_size, self.num_steps, self.num_features))
-        y_value = np.zeros((batch_size, self.agent.NUM_ACTIONS))
-        value_max_next = 0
-        reward_next = self.memory_reward[-1]
-        for i, (sample, action, value, reward) in enumerate(memory):
-            x[i] = sample
-            y_value[i] = value
-            r = (delayed_reward + reward_next - reward * 2) * 100
-            y_value[i, action] = r + discount_factor * value_max_next
-            value_max_next = value.max()
-            reward_next = reward
-        return x, y_value, None
-
-
-class PolicyGradientLearner(ReinforcementLearner):
-    def __init__(self, *args, policy_network_path=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.policy_network_path = policy_network_path
-        self.init_policy_network()
-
-    def get_batch(self, batch_size, delayed_reward, discount_factor):
-        memory = zip(
-            reversed(self.memory_sample[-batch_size:]),
-            reversed(self.memory_action[-batch_size:]),
-            reversed(self.memory_policy[-batch_size:]),
-            reversed(self.memory_reward[-batch_size:]),
-        )
-        x = np.zeros((batch_size, self.num_steps, self.num_features))
-        y_policy = np.full((batch_size, self.agent.NUM_ACTIONS), .5)
-        reward_next = self.memory_reward[-1]
-        for i, (sample, action, policy, reward) in enumerate(memory):
-            x[i] = sample
-            y_policy[i] = policy
-            r = (delayed_reward + reward_next - reward * 2) * 100
-            y_policy[i, action] = sigmoid(r)
-            reward_next = reward
-        return x, None, y_policy
-
 
 class ActorCriticLearner(ReinforcementLearner):
     def __init__(self, *args, shared_network=None, 

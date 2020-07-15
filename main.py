@@ -67,7 +67,7 @@ if __name__ == '__main__':
         
     # 로그, Keras Backend 설정을 먼저하고 RLTrader 모듈들을 이후에 임포트해야 함
     from agent import Agent
-    from learners import DQNLearner, PolicyGradientLearner, ActorCriticLearner, A2CLearner, A3CLearner
+    from learners import ActorCriticLearner, A2CLearner, A3CLearner
 
     # 모델 경로 준비
     value_network_path = ''
@@ -129,13 +129,7 @@ if __name__ == '__main__':
                                     'min_trading_unit': min_trading_unit, 
                                     'max_trading_unit': max_trading_unit})
 
-            if args.rl_method == 'dqn':
-                learner = DQNLearner(**{**common_params,
-                                        'value_network_path': value_network_path})
-            elif args.rl_method == 'pg':
-                learner = PolicyGradientLearner(**{**common_params,
-                                                    'policy_network_path': policy_network_path})
-            elif args.rl_method == 'ac':
+            if args.rl_method == 'ac':
                 learner = ActorCriticLearner(**{
                     **common_params,
                     'value_network_path': value_network_path,
