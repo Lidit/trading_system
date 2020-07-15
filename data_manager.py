@@ -8,7 +8,7 @@ COLUMNS_CHART_DATA = ['date','current', 'open', 'high', 'low', 'volume']
 COLUMNS_INDEX_DATA = ['KOSPI', 'KOSDAQ']
 
 def load_stock_data(stock_code):
-    path = os.path.join(settings.BASE_DIR, f'data/stocks/{stock_code}.csv')
+    path = os.path.join(settings.BASE_DIR, f'data\stocks\{stock_code}.csv')
     data = pd.read_csv(path, thousands=',', header=None, names=COLUMNS_CHART_DATA,
         converters={'date': lambda x: str(x)})
 
@@ -53,7 +53,7 @@ def load_stock_index_data():
     
     
     for index in COLUMNS_INDEX_DATA:
-        path = os.path.join(settings.BASE_DIR, f'data/stockIndex/{index}.csv')
+        path = os.path.join(settings.BASE_DIR, f'data\stockIndex\{index}.csv')
         data = pd.read_csv(path, thousands=',', header=None, names=COLUMNS_CHART_DATA,
         converters={'date': lambda x: str(x)})
         

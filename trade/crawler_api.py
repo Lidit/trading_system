@@ -47,7 +47,7 @@ class MainWindow(QMainWindow, form_class) :
         
         self.getStockDataButton.clicked.connect(self.getStockData)
 
-        start_date = datetime.datetime.now() - datetime.timedelta(days=10)
+        start_date = datetime.datetime.now() - datetime.timedelta(days=20)
         start_date = datetime.datetime.combine(start_date, datetime.time(9,0))
         end_date = datetime.datetime.combine(datetime.datetime.now(), datetime.time(16,0))
         self.startDateDateEdit.setDate(start_date)

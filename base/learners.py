@@ -5,11 +5,11 @@ import collections
 import threading
 import time
 import numpy as np
-from utils import sigmoid
-from environment import Environment
-from agent import Agent
-from networks import Network, LSTMNetwork
-from visualizer import Visualizer
+from base.utils import sigmoid
+from base.environment import Environment
+from base.agent import Agent
+from base.networks import Network, LSTMNetwork
+from base.visualizer import Visualizer
 
 class ReinforcementLearner:
     __metaclass__ = abc.ABCMeta

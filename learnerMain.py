@@ -4,10 +4,13 @@ import sys
 import logging
 import argparse
 import json
-
-import settings
-import utils
+import datetime
 import data_manager
+import settings
+
+from base import utils
+
+
 
 from PyQt5.QtWidgets import *
 from PyQt5.QAxContainer import *
@@ -36,19 +39,22 @@ if __name__ == '__main__':
     parser.add_argument('--policy_network_name')
     parser.add_argument('--reuse_models', action='store_true')
     parser.add_argument('--learning', action='store_true')
-    parser.add_argument('--start_date', default='20200625090000')
-    parser.add_argument('--end_date', default='20200625160000')
+
+    start_date = datetime.datetime.now() - datetime.timedelta(days=7)
+    start_date = datetime.datetime.combine(start_date, datetime.time(9,0))
+    end_date = datetime.datetime.combine(datetime.datetime.now(), datetime.time(16,0))
+
+    parser.add_argument('--start_date', default=start_date.strftime("%Y%m%d%H%M%S"))
+    parser.add_argument('--end_date', default=end_date.strftime("%Y%m%d%H%M%S"))
     args = parser.parse_args()
 
     # Keras Backend 설정
     if args.backend == 'tensorflow':
         os.environ['KERAS_BACKEND'] = 'tensorflow'
-    elif args.backend == 'plaidml':
-        os.environ['KERAS_BACKEND'] = 'plaidml.keras.backend'
 
     # 출력 경로 설정
     output_path = os.path.join(settings.BASE_DIR, 
-        'output/{}_{}_{}'.format(args.output_name, args.rl_method, args.net))
+        'output/{}/{}_{}_{}'.format(datetime.datetime.now().strftime("%Y%m%d%H%M%S"), args.output_name, args.rl_method, args.net))
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
@@ -66,12 +72,13 @@ if __name__ == '__main__':
                         handlers=[file_handler, stream_handler], level=logging.DEBUG)
         
     # 로그, Keras Backend 설정을 먼저하고 RLTrader 모듈들을 이후에 임포트해야 함
-    from agent import Agent
-    from learners import ActorCriticLearner, A2CLearner, A3CLearner
+    from base.agent import Agent
+    from base.learners import ActorCriticLearner, A2CLearner, A3CLearner
 
     # 모델 경로 준비
     value_network_path = ''
     policy_network_path = ''
+
     if args.value_network_name is not None:
         value_network_path = os.path.join(settings.BASE_DIR, 
             f'models\{args.value_network_name}.h5')
@@ -79,6 +86,7 @@ if __name__ == '__main__':
         value_network_path = os.path.join(
             output_path, '{}_{}_value_{}.h5'.format(
                 args.rl_method, args.net, args.output_name))
+    
     if args.policy_network_name is not None:
         policy_network_path = os.path.join(settings.BASE_DIR, 
             'models\{}.h5'.format(args.policy_network_name))
