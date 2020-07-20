@@ -6,9 +6,10 @@ import argparse
 import json
 import datetime
 from datetime import timedelta
+import requests
 
 import settings
-import utils
+from base import utils
 import data_manager
 
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -18,8 +19,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QAxContainer import *
 from PyQt5.QtCore import *
 from PyQt5 import uic
-from trader import *
-
+from trader import Trader
+import time
 
 ui_path = f'{os.path.dirname(os.path.abspath(__file__))}/ui/trader_ui.ui'
 form_class = uic.loadUiType(ui_path)[0]
@@ -68,9 +69,9 @@ class MainWindow(QMainWindow, form_class):
         self.depositLineEdit.setText(f'{balance}')
 
         value_network_path = os.path.join(settings.BASE_DIR,
-                                                'models/20200623_a3c_lstm_value_081000_108230_006400_265520_032620.h5')
+                                                'models/a3c_lstm_value_081000_108230_006400_265520_032620.h5')
         policy_network_path = os.path.join(settings.BASE_DIR,
-                                                'models/20200623_a3c_lstm_policy_081000_108230_006400_265520_032620.h5')
+                                                'models/a3c_lstm_policy_081000_108230_006400_265520_032620.h5')
         
         # 공통 파라미터 설정
         
