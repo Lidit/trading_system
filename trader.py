@@ -25,7 +25,7 @@ import tensorflow as tf
 graph = tf.get_default_graph()
 sess = tf.compat.v1.Session()
 
-from networks import LSTMNetwork
+from base.networks import LSTMNetwork
 
 # from crawler_api import PyMon
 from kiwoom_api import *
@@ -38,16 +38,16 @@ from kiwoom_api import *
 # sess = tf.compat.v1.Session()
 
 import collections
-from environment import Environment, RealTimeEnvironment
-from agent import Agent
-from visualizer import Visualizer
+from base.environment import Environment, RealTimeEnvironment
+from tradeAgent import TradeAgent
+from base.visualizer import Visualizer
 import data_manager
 
 import requests
 import json
 
 #accno 8136846611 한지민
-#accno 8133856511
+#accno 8141007211
 
 class Trader:
     def __init__(self, gui_window = None, chart_data = None, training_data=None, stock_code =None, num_steps=1, min_trading_unit=1, max_trading_unit=2,
@@ -72,7 +72,7 @@ class Trader:
         # print(self.environment.observe())
         self.training_data = training_data
         # print(self.environment.get_price())
-        self.agent = Agent(self.environment,
+        self.agent = TradeAgent(self.environment,
             min_trading_unit=min_trading_unit,
             max_trading_unit=max_trading_unit,
             delayed_reward_threshold=delayed_reward_threshold,
@@ -183,24 +183,10 @@ class Trader:
         # 가시화 초기화
         # self.visualizer.clear([0, len(self.chart_data)])
         # 메모리 초기화
-        self.memory_sample = []
-        self.memory_action = []
-        self.memory_reward = []
-        self.memory_value = []
-        self.memory_policy = []
-        self.memory_pv = []
-        self.memory_num_stocks = []
-        self.memory_exp_idx = []
-        self.memory_learning_idx = []
-
 
     def trade(self):
         self.printLog(f'정보 업데이트 및 AI 판단 : {datetime.datetime.now().strftime("%Y%m%d%H%M%S")}')
         q_sample = collections.deque(maxlen=1)
-        
-        
-            # self.reset()
-            # time_start_epoch = time.time() 시간기록 어케 해둬보셈
 
         next_sample = self.build_sample()
         q_sample.append(next_sample)
@@ -209,22 +195,16 @@ class Trader:
 
         # 신경망 또는 탐험에 의한 행동 결정
         action, confidence, exploration = self.agent.decide_action( pred_value, pred_policy, 0)
-
-        # 결정한 행동을 수행하고 즉시 보상과 지연 보상 획득
-        immediate_reward, delayed_reward = self.agent.act(action, confidence)
-            
-        print(action)
+        
         self.printLog(action)
             
         if not self.agent.validate_action(action):
             action = Agent.ACTION_HOLD
             
-        print(action)
         self.printLog(action)
 
-        print(self.agent.num_stocks)
         self.printLog(self.agent.num_stocks)
-
+        self.agent.set
         # 행동 결정에 따른 거래 요청
         if action == 0:
             self.printLog("매수 합니다~")
@@ -253,43 +233,11 @@ class Trader:
             self.printLog("관망 합니다아~")
             self.num_hold += 1
 
-        # 행동 및 행동에 대한 결과를 기억
-        self.memory_sample.append(list(q_sample))
-        self.memory_action.append(action)
-        self.memory_reward.append(immediate_reward)
-
-        if self.value_network is not None:
-            self.memory_value.append(pred_value)
-        if self.policy_network is not None:
-            self.memory_policy.append(pred_policy)
-
-        self.memory_pv.append(self.agent.portfolio_value)
-        self.memory_num_stocks.append(self.agent.num_stocks)
-
-        if exploration:
-            self.memory_exp_idx.append(self.training_data_idx)
-
-            # 지연 보상 발생된 경우 미니 배치 학습
-            # if learning and (delayed_reward != 0):
-            #     self.fit(delayed_reward, discount_factor)
-            # 거래 정보 로그 기록
-            # num_epoches_digit = int(str(datetime.now().hour) + str(datetime.now().minute))
-            # epoch_str = str(10).rjust(num_epoches_digit, '0')
-            # time_end_epoch = time.time()
-            # elapsed_time_epoch = time_end_epoch - time_start_epoch
-            # if self.learning_cnt > 0:
-            #     self.loss /= self.learning_cnt
-            # logging.info("[{}][Epoch {}/{}] Epsilon:{:.4f} "
-            #     "#Expl.:{}/{} #Buy:{} #Sell:{} #Hold:{} "
-            #     "#Stocks:{} PV:{:,.0f} "
-            #     "LC:{} Loss:{:.6f} ET:{:.4f}".format(
-            #         self.stock_code, epoch_str, num_epoches, epsilon, 
-            #         self.exploration_cnt, self.itr_cnt,
-            #         self.agent.num_buy, self.agent.num_sell, 
-            #         self.agent.num_hold, self.agent.num_stocks, 
-            #         self.agent.portfolio_value, self.learning_cnt, 
-            #         self.loss, elapsed_time_epoch))
-        # self.visualize(str(time_end_epoch), num_epoches, epsilon)
+        cash = requests.post(self.balance_url, json={}, headers=None )
+        time.sleep(0.34)
+        balance = cash.json()
+        self.balance = balance["cash"]
+        self.printLog(balance)
 
     def printLog(self, log):
         self.gui_window.logTextBrowser.append(f'{log}')
