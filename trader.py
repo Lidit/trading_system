@@ -186,6 +186,12 @@ class Trader:
 
     def trade(self):
         self.printLog(f'정보 업데이트 및 AI 판단 : {datetime.datetime.now().strftime("%Y%m%d%H%M%S")}')
+        
+        cash = requests.post(self.balance_url, json={}, headers=None )
+        time.sleep(0.34)
+        balance = cash.json()
+        self.balance = balance["cash"]
+        
         q_sample = collections.deque(maxlen=1)
 
         next_sample = self.build_sample()
@@ -199,12 +205,14 @@ class Trader:
         self.printLog(action)
             
         if not self.agent.validate_action(action):
-            action = Agent.ACTION_HOLD
+            action = TradeAgent.ACTION_HOLD
             
         self.printLog(action)
 
         self.printLog(self.agent.num_stocks)
-        self.agent.set
+        
+        self.agent.set_balance(self.balance)
+
         # 행동 결정에 따른 거래 요청
         if action == 0:
             self.printLog("매수 합니다~")
