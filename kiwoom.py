@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import QApplication
 import numpy as np
 import pandas as pd
 
-import util
+from base import util
 
 
 # 상수
