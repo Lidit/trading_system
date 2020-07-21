@@ -147,26 +147,6 @@ class Trader:
         self.agent.environment.set_chart_data(self.chart_data)
         self.environment.observe()
 
-        # self.agent = Agent(self.environment,
-        #     min_trading_unit=min_trading_unit,
-        #     max_trading_unit=max_trading_unit,
-        #     delayed_reward_threshold=0.05)
-        
-        
-        # 잔고를 실시간으로 강제 갱신
-        cash = requests.post(self.balance_url, json={}, headers=None )
-        time.sleep(0.34)
-        balance = cash.json()
-        self.balance = balance["cash"]
-        
-        self.printLog('잔고 및 주식 정보 갱신')
-
-        self.gui_window.depositLineEdit.setText(f'{balance["cash"]}')
-        self.gui_window.currentStockLineEdit.setText(f'{self.environment.get_price()}')
-        self.gui_window.volumeLineEdit.setText(f'{self.environment.get_value()}')
-
-        # self.agent.set_balance(self.balance) # ?? 몬가 이상해 지민아... 암튼 이거 쫌 아닌거 같아서 주석함
-        self.agent.balance = self.balance
         self.agent.environment.set_chart_data(self.chart_data)
         
         self.sample = training_data.iloc[-1].tolist()
@@ -186,12 +166,25 @@ class Trader:
 
     def trade(self):
         self.printLog(f'정보 업데이트 및 AI 판단 : {datetime.datetime.now().strftime("%Y%m%d%H%M%S")}')
-        
+
+        self.printLog('잔고 및 주식 정보 갱신')
         cash = requests.post(self.balance_url, json={}, headers=None )
         time.sleep(0.34)
         balance = cash.json()
-        self.balance = balance["cash"]
+        stockDict = balance["dict"]
         
+        self.agent.set_balance(balance["cash"])
+        
+        if self.stock_code in stockDict:
+            print(stockDict[self.stock_code]["보유수량"])
+            self.agent.set_num_stocks(stockDict[self.stock_code]["보유수량"])
+        
+        self.gui_window.depositLineEdit.setText(f'{balance["cash"]}')
+        self.gui_window.currentStockLineEdit.setText(f'{self.environment.get_price()}')
+        self.gui_window.volumeLineEdit.setText(f'{self.environment.get_value()}')
+
+        self.printLog(balance)
+
         q_sample = collections.deque(maxlen=1)
 
         next_sample = self.build_sample()
@@ -203,15 +196,17 @@ class Trader:
         action, confidence, exploration = self.agent.decide_action( pred_value, pred_policy, 0)
         
         self.printLog(action)
-            
+
+
+
         if not self.agent.validate_action(action):
             action = TradeAgent.ACTION_HOLD
-            
+        
         self.printLog(action)
 
         self.printLog(self.agent.num_stocks)
         
-        self.agent.set_balance(self.balance)
+        
 
         # 행동 결정에 따른 거래 요청
         if action == 0:
@@ -244,7 +239,16 @@ class Trader:
         cash = requests.post(self.balance_url, json={}, headers=None )
         time.sleep(0.34)
         balance = cash.json()
-        self.balance = balance["cash"]
+        self.agent.set_balance(balance["cash"])
+
+        if self.stock_code in stockDict:
+            print(stockDict[self.stock_code]["보유수량"])
+            self.agent.set_num_stocks(stockDict[self.stock_code]["보유수량"])
+
+        self.gui_window.depositLineEdit.setText(f'{balance["cash"]}')
+        self.gui_window.currentStockLineEdit.setText(f'{self.environment.get_price()}')
+        self.gui_window.volumeLineEdit.setText(f'{self.environment.get_value()}')
+        
         self.printLog(balance)
 
     def printLog(self, log):
