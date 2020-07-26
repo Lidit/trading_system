@@ -101,7 +101,7 @@ class BalanceHandler(RequestHandler):
             time.sleep(0.1)
         print(hts.dict_holding.items())
         result = {}
-        result["cash"] = hts.int_주문가능금액
+        result["balance"] = hts.int_주문가능금액
         result["dict"] = hts.dict_holding
         self.write(json.dumps(result))
 

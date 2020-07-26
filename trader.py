@@ -50,14 +50,9 @@ import json
 #accno 8141007211
 
 class Trader:
-    def __init__(self, gui_window = None, chart_data = None, training_data=None, stock_code =None, num_steps=1, min_trading_unit=1, max_trading_unit=2,
-    value_network_path=None, policy_network_path=None, balance = 9986883, delayed_reward_threshold =.05):
+    def __init__(self, gui_window = None, chart_data = None, training_data=None, stock_code =None, num_steps=1,
+    value_network_path=None, policy_network_path=None, delayed_reward_threshold =.05):
 
-        # 인자 확인
-        assert min_trading_unit > 0
-        assert max_trading_unit > 0
-        assert max_trading_unit >= min_trading_unit
-        assert num_steps > 0
         self.balance_url = "http://127.0.0.1:5550/balance"
         self.price_url = "http://127.0.0.1:5550/price"
         self.order_url = "http://127.0.0.1:5550/order"
@@ -68,38 +63,16 @@ class Trader:
         self.stock_code = stock_code
         self.chart_data = chart_data
         self.environment = RealTimeEnvironment(chart_data)
-        self.environment.observe()
-        # print(self.environment.observe())
-        self.training_data = training_data
-        # print(self.environment.get_price())
-        self.agent = TradeAgent(self.environment,
-            min_trading_unit=min_trading_unit,
-            max_trading_unit=max_trading_unit,
-            delayed_reward_threshold=delayed_reward_threshold,
-            gui_window=gui_window)
+        self.environment.observe() 
+        self.training_data = training_data 
 
-        self.visualizer = Visualizer()
-
-        # 메모리
-        self.memory_sample = []
-        self.memory_action = []
-        self.memory_reward = []
-        self.memory_value = []
-        self.memory_policy = []
-        self.memory_pv = []
-        self.memory_num_stocks = []
-        self.memory_exp_idx = []
-        self.memory_learning_idx = []
-
-        self.num_hold = 0
-        #
         cash = requests.post(self.balance_url, json={}, headers=None )
         time.sleep(0.34)
-        balance = cash.json()
-        self.balance = balance["cash"]
-        
-        self.agent.set_balance(self.balance)
-        self.agent.reset()
+        cash = cash.json()
+        balance = cash["balance"]
+        stock_dict = cash["dict"]
+
+        self.agent = TradeAgent(self.environment, gui_window, stock_code, balance, stock_dict)
 
         self.num_features = self.agent.STATE_DIM
         if self.training_data is not None:
@@ -156,13 +129,6 @@ class Trader:
     def reset(self):
         self.sample = None
         self.training_data_idx = -1
-        # 환경 초기화
-        # self.environment.reset()
-        # 에이전트 초기화
-        # self.agent.reset()
-        # 가시화 초기화
-        # self.visualizer.clear([0, len(self.chart_data)])
-        # 메모리 초기화
 
     def trade(self):
         self.printLog(f'정보 업데이트 및 AI 판단 : {datetime.datetime.now().strftime("%Y%m%d%H%M%S")}')
@@ -170,16 +136,18 @@ class Trader:
         self.printLog('잔고 및 주식 정보 갱신')
         cash = requests.post(self.balance_url, json={}, headers=None )
         time.sleep(0.34)
-        balance = cash.json()
-        stockDict = balance["dict"]
+        cash = cash.json()
+        balance = cash['balance']
+        stockDict = cash["dict"]
         
-        self.agent.set_balance(balance["cash"])
+        self.agent.set_balance(balance)
         
         if self.stock_code in stockDict:
-            print(stockDict[self.stock_code]["보유수량"])
             self.agent.set_num_stocks(stockDict[self.stock_code]["보유수량"])
+        else:
+            self.agent.set_num_stocks(0)
         
-        self.gui_window.depositLineEdit.setText(f'{balance["cash"]}')
+        self.gui_window.depositLineEdit.setText(f'{balance}')
         self.gui_window.currentStockLineEdit.setText(f'{self.environment.get_price()}')
         self.gui_window.volumeLineEdit.setText(f'{self.environment.get_value()}')
 
@@ -195,7 +163,9 @@ class Trader:
         # 신경망 또는 탐험에 의한 행동 결정
         action, confidence, exploration = self.agent.decide_action( pred_value, pred_policy, 0)
         
-        self.printLog(action)
+        self.printLog(f'행동 : {action}')
+        self.printLog(f'confidence : {confidence}')
+        self.printLog(f'exploration : {exploration}')
 
 
 
@@ -204,15 +174,13 @@ class Trader:
         
         self.printLog(action)
 
-        self.printLog(self.agent.num_stocks)
+        self.printLog(f'보유 주식 수 : {self.agent.num_stocks}')
         
-        
-
         # 행동 결정에 따른 거래 요청
         if action == 0:
-            self.printLog("매수 합니다~")
+            self.printLog("매수")
             data = {
-            "qty": self.agent.decide_trading_unit(confidence),
+            "qty": self.agent.decide_buy_unit(confidence),
             "price": 0,
             "code": self.stock_code,
             "type": "market",
@@ -222,104 +190,36 @@ class Trader:
             # data = resp.json()
                 
         elif action == 1:
-            self.printLog("매도 합니다~")
+            self.printLog("매도")
             data = {
-            "qty": -(self.agent.decide_trading_unit(confidence)), 
+            "qty": -(self.agent.decide_sell_unit(confidence)), 
             "price": 0,
             "code": self.stock_code,
             "type": "market"
             }
             resp = requests.post(self.order_url, data=json.dumps(data))
             time.sleep(0.34)
-            # data = resp.json()
+
         elif action == 2:
-            self.printLog("관망 합니다아~")
-            self.num_hold += 1
+            self.printLog("관망")
 
         cash = requests.post(self.balance_url, json={}, headers=None )
         time.sleep(0.34)
-        balance = cash.json()
-        self.agent.set_balance(balance["cash"])
-
+        cash = cash.json()
+        balance = cash['balance']
+        stockDict = cash["dict"]
+        
+        self.agent.set_balance(balance)
         if self.stock_code in stockDict:
-            print(stockDict[self.stock_code]["보유수량"])
             self.agent.set_num_stocks(stockDict[self.stock_code]["보유수량"])
+        else:
+            self.agent.set_num_stocks(0)
 
-        self.gui_window.depositLineEdit.setText(f'{balance["cash"]}')
+        self.gui_window.depositLineEdit.setText(f'{balance}')
         self.gui_window.currentStockLineEdit.setText(f'{self.environment.get_price()}')
         self.gui_window.volumeLineEdit.setText(f'{self.environment.get_value()}')
-        
-        self.printLog(balance)
+
+        self.printLog('')
 
     def printLog(self, log):
         self.gui_window.logTextBrowser.append(f'{log}')
-
-if __name__ == "__main__":
-
-    price_url = "http://127.0.0.1:5550/price"
-    balance_url = "http://127.0.0.1:5550/balance"
-    # account_num = "8133856511"
-    stock_code = "265520"
-    # keys = {'k1': 'v1', 'k2': 'v2'}
-
-    
-    # 초기 현금잔고 init
-    cash = requests.post(balance_url, json={"accno" :  "8133856511" }, headers=None )
-    time.sleep(0.34)
-    cash = cash.json()
-    balance = cash['cash']
-
-    # 모델 경로 준비
-    # value_network_path = os.path.join(settings.BASE_DIR,
-    #                                           f'models\{value_network_name}.h5')
-    # policy_network_path = os.path.join(settings.BASE_DIR,
-    #                                            'models\{}.h5'.format(policy_network_name))
-
-    value_network_path = os.path.join(settings.BASE_DIR,
-                                              'models/a2c_lstm_value_20200526052844.h5')
-    policy_network_path = os.path.join(settings.BASE_DIR,
-                                               'models/a2c_lstm_policy_20200526052844.h5')
-
-    
-     # 공통 파라미터 설정
-    
-    # 키움 서버에서 차트 데이터 갱신해 저장하기
-    price = requests.post(price_url, json={"code" :  stock_code }, headers=None )
-    while not price.json():
-        time.sleep(0.34)
-    
-    
-
-    # 갱신된 차트 데이터 불러오기
-    # chart_data, training_data 매일매일 일자 갱신 수동으로 할필요없게 수정 부탁함
-    chart_data, training_data = data_manager.load_data(stock_code, "20200528090000", "20200528163000")
-    
-    # print(chart_data)
-    # print(training_data)
-   
-
-    min_trading_unit = max(
-            int(1000000 / chart_data.iloc[-1]['current']), 1)
-    max_trading_unit = max(
-             int(10000000 / chart_data.iloc[-1]['current']), 1)
-    common_params = {'stock_code': stock_code,
-                    'delayed_reward_threshold': 0.05,
-                    'num_steps': 1,
-                    'balance' : balance,
-                    # 'output_path': os.path.join(settings.BASE_DIR,
-                    #                'output/tradetest'),
-                    'min_trading_unit': min_trading_unit, 
-                    'max_trading_unit': max_trading_unit,
-                    'chart_data': chart_data,
-                    'training_data': training_data
-                    }
-
-    
-    # 거래 시작
-
-    trader = Trader(**common_params)
-    trader.trade()
-
-    
-
-    

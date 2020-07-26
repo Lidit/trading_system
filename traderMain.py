@@ -60,14 +60,6 @@ class MainWindow(QMainWindow, form_class):
         start_date = datetime.datetime.combine(start_date, datetime.time(9,0))
         end_date = datetime.datetime.combine(datetime.datetime.now(), datetime.time(16,0))
 
-        # 초기 현금잔고 init
-        cash = requests.post(balance_url, json={}, headers=None )
-        time.sleep(0.34)
-
-        cash = cash.json()
-        balance = cash['cash']
-        self.depositLineEdit.setText(f'{balance}')
-
         value_network_path = os.path.join(settings.BASE_DIR,
                                                 'models/a3c_lstm_value_081000_108230_006400_265520_032620.h5')
         policy_network_path = os.path.join(settings.BASE_DIR,
@@ -96,9 +88,6 @@ class MainWindow(QMainWindow, form_class):
                         'stock_code': stock_code,
                         'delayed_reward_threshold': 0.05,
                         'num_steps': 1,
-                        'balance' : balance,
-                        'min_trading_unit': min_trading_unit, 
-                        'max_trading_unit': max_trading_unit,
                         'chart_data': chart_data,
                         'training_data': training_data
                         }
