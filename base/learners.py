@@ -18,7 +18,7 @@ class ReinforcementLearner:
     def __init__(self, rl_method='rl', stock_code=None, 
                 chart_data=None, training_data=None,
                 min_trading_unit=1, max_trading_unit=2, 
-                delayed_reward_threshold=.05,
+                delayed_reward_threshold=.03,
                 net='dnn', num_steps=1, lr=0.001,
                 value_network=None, policy_network=None,
                 output_path='', reuse_models=True):
