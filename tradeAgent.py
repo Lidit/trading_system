@@ -143,9 +143,9 @@ class TradeAgent:
             self.printLog(f'매도 수량 : 0')
             return 0
         
-        sell_count = self.num_stocks * 0.1
+        sell_count = self.num_stocks / 2
         
-        if sell_count > 1:
+        if sell_count >= 1:
             self.printLog(f'매도 수량 : {sell_count}')
             return sell_count
         else:

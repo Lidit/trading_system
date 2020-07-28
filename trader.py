@@ -46,8 +46,33 @@ import data_manager
 import requests
 import json
 
+import logging
+from logging import FileHandler
+
 #accno 8136846611 한지민
 #accno 8141007211
+
+formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
+                              datefmt='%Y-%m-%d %H:%M:%S')
+
+# 로그 파일 핸들러
+now = datetime.datetime.now().isoformat()[:10]
+logf = now + ".log"
+logf = os.path.join("traderLogs", logf)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+fh_log = FileHandler(os.path.join(BASE_DIR, logf), encoding='utf-8')
+fh_log.setLevel(logging.DEBUG)
+fh_log.setFormatter(formatter)
+
+# stdout handler
+stdout_handler = logging.StreamHandler(sys.stdout)
+stdout_handler.setFormatter(formatter)
+
+# 로거 생성 및 핸들러 등록
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(fh_log)
+logger.addHandler(stdout_handler)
 
 class Trader:
     def __init__(self, gui_window = None, chart_data = None, training_data=None, stock_code =None, num_steps=1,
@@ -151,8 +176,6 @@ class Trader:
         self.gui_window.currentStockLineEdit.setText(f'{self.environment.get_price()}')
         self.gui_window.volumeLineEdit.setText(f'{self.environment.get_value()}')
 
-        self.printLog(balance)
-
         q_sample = collections.deque(maxlen=1)
 
         next_sample = self.build_sample()
@@ -172,8 +195,8 @@ class Trader:
         if not self.agent.validate_action(action):
             action = TradeAgent.ACTION_HOLD
         
-        self.printLog(action)
-
+        self.printLog(f'검증된 행동 : {action}')
+        self.printLog(f'예수금 : {self.agent.balance}')
         self.printLog(f'보유 주식 수 : {self.agent.num_stocks}')
         
         # 행동 결정에 따른 거래 요청
@@ -215,6 +238,9 @@ class Trader:
         else:
             self.agent.set_num_stocks(0)
 
+        self.printLog(f'예수금 : {self.agent.balance}')
+        self.printLog(f'보유 주식 수 : {self.agent.num_stocks}')
+        
         self.gui_window.depositLineEdit.setText(f'{balance}')
         self.gui_window.currentStockLineEdit.setText(f'{self.environment.get_price()}')
         self.gui_window.volumeLineEdit.setText(f'{self.environment.get_value()}')
@@ -222,4 +248,5 @@ class Trader:
         self.printLog('')
 
     def printLog(self, log):
+        logger.debug(log)
         self.gui_window.logTextBrowser.append(f'{log}')
