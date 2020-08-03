@@ -108,7 +108,7 @@ class MainWindow(QMainWindow, form_class) :
                 self.kiwoom.comm_rq_data("opt10080_req", "opt10080", 2, "0101")
                 for key, val in self.kiwoom.ohlcv.items():
                     ohlcv[key][-1:] = val
-            
+                
             df = pd.DataFrame(ohlcv, columns=['date','current', 'open', 'high', 'low', 'volume'])
             df = df[df.date >= start_date]
             df = df.sort_values(by=['date'], axis=0)
@@ -147,7 +147,7 @@ class MainWindow(QMainWindow, form_class) :
                 self.kiwoom.set_input_value("업종코드", "001")
                 self.kiwoom.set_input_value("틱범위", "1")
                 self.kiwoom.comm_rq_data("opt20005_req", "opt20005", 2, "0101")
-
+            
             df = pd.DataFrame(ohlcv, columns=['date','current', 'open', 'high', 'low', 'volume'])
             df = df[df.date >= start_date]
             df = df.sort_values(by=['date'], axis=0)
