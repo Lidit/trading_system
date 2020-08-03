@@ -12,7 +12,7 @@ import settings
 from base import utils
 import data_manager
 
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.jobstores.base import JobLookupError
 
 from PyQt5.QtWidgets import *
@@ -30,7 +30,7 @@ class MainWindow(QMainWindow, form_class):
         super().__init__()
         self.setupUi(self)
         
-        self.sched = BackgroundScheduler()
+        self.sched = BlockingScheduler()
         self.sched.start()
 
         self.startTradePushButton.clicked.connect(self.startPushButtonEvent)
