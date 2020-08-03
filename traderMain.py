@@ -12,7 +12,7 @@ import settings
 from base import utils
 import data_manager
 
-from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.base import JobLookupError
 
 from PyQt5.QtWidgets import *
@@ -30,7 +30,7 @@ class MainWindow(QMainWindow, form_class):
         super().__init__()
         self.setupUi(self)
         
-        self.sched = BlockingScheduler()
+        self.sched = BackgroundScheduler()
         self.sched.start()
 
         self.startTradePushButton.clicked.connect(self.startPushButtonEvent)
@@ -104,7 +104,7 @@ class MainWindow(QMainWindow, form_class):
     def startPushButtonEvent(self):
         self.initTrader()
         self.stockCodeLineEdit.setText(self.inputStockCodeLineEdit.text())
-        self.sched.add_job(self.job_trade, 'cron', second='0', id=self.inputStockCodeLineEdit.text())
+        self.sched.add_job(self.job_trade, 'cron', second='0', id=self.inputStockCodeLineEdit.text(), max_instances=5)
         self.logTextBrowser.append('거래 시작됨')
 
     def stopPushButtonEvent(self):
