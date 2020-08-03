@@ -40,10 +40,10 @@ if __name__ == '__main__':
     parser.add_argument('--reuse_models', action='store_true')
     parser.add_argument('--learning', action='store_true')
 
-    start_date = datetime.datetime.now() - datetime.timedelta(days=0)
+    start_date = datetime.datetime.now() - datetime.timedelta(days=2)
     start_date = datetime.datetime.combine(start_date, datetime.time(9,0))
     end_date = datetime.datetime.combine(datetime.datetime.now(), datetime.time(16,0))
-
+    
     parser.add_argument('--start_date', default=start_date.strftime("%Y%m%d%H%M%S"))
     parser.add_argument('--end_date', default=end_date.strftime("%Y%m%d%H%M%S"))
     args = parser.parse_args()
