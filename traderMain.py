@@ -96,7 +96,10 @@ class MainWindow(QMainWindow, form_class):
         self.trader = Trader(**common_params)
 
     def job_trade(self):
-        self.trader.trade()
+        start_date = datetime.datetime.combine(datetime.datetime.now(), datetime.time(9,0))
+
+        if datetime.datetime.now() >= start_date:
+            self.trader.trade()
 
     def shutdownPushButtonEvent(self):
         exit()
