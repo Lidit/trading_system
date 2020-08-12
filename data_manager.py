@@ -159,7 +159,7 @@ def load_data(stock_code, date_from, date_to):
     chart_data.reset_index(drop=True, inplace=True)
     
     training_data = load_stock_data(stock_code)
-    training_data = pd.merge(training_data, load_stock_index_data(), on='date')
+    #training_data = pd.merge(training_data, load_stock_index_data(), on='date')
     
     data_path = f'{default_training_dir}/3.custom_training_{stock_code}.csv'
 
