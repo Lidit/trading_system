@@ -93,7 +93,7 @@ class Trader:
 
         self.printLog('초기 잔고 및 주식 정보 갱신')
         cash = requests.post(self.balance_url, json={}, headers=None )
-        time.sleep(0.34)
+        time.sleep(0.5)
         cash = cash.json()
         balance = cash["balance"]
         stock_dict = cash["dict"]
@@ -140,6 +140,8 @@ class Trader:
                                                 "end_date" : end_date.strftime("%Y%m%d%H%M%S")
                                                 }, 
                                                 headers=None)
+        time.sleep(0.5)
+
         while not price.json():
             time.sleep(0.1)
 
@@ -195,7 +197,7 @@ class Trader:
             "type": "market",
             }
             resp = requests.post(self.order_url, data=json.dumps(data))
-            time.sleep(0.34)
+            time.sleep(0.5)
             # data = resp.json()
                 
         elif action == 1:
@@ -207,7 +209,7 @@ class Trader:
             "type": "market"
             }
             resp = requests.post(self.order_url, data=json.dumps(data))
-            time.sleep(0.34)
+            time.sleep(0.5)
 
         elif action == 2:
             self.printLog("관망")
