@@ -107,7 +107,7 @@ class MainWindow(QMainWindow, form_class):
     def startPushButtonEvent(self):
         self.initTrader()
         self.stockCodeLineEdit.setText(self.inputStockCodeLineEdit.text())
-        self.sched.add_job(self.job_trade, 'cron', second='0', id=self.inputStockCodeLineEdit.text(), max_instances=5)
+        self.sched.add_job(self.job_trade, 'cron', second='0,10,20,30,40,50', id=self.inputStockCodeLineEdit.text(), max_instances=5)
         self.logTextBrowser.append('거래 시작됨')
 
     def stopPushButtonEvent(self):
