@@ -91,13 +91,19 @@ class Trader:
         self.environment.observe() 
         self.training_data = training_data 
 
+        self.printLog('초기 잔고 및 주식 정보 갱신')
         cash = requests.post(self.balance_url, json={}, headers=None )
         time.sleep(0.34)
         cash = cash.json()
         balance = cash["balance"]
         stock_dict = cash["dict"]
 
+
         self.agent = TradeAgent(self.environment, gui_window, stock_code, balance, stock_dict)
+        
+        self.gui_window.depositLineEdit.setText(f'{balance}')
+        self.gui_window.currentStockLineEdit.setText(f'{self.environment.get_price()}')
+        self.gui_window.volumeLineEdit.setText(f'{self.environment.get_value()}')
 
         self.num_features = self.agent.STATE_DIM
         if self.training_data is not None:
@@ -158,24 +164,6 @@ class Trader:
     def trade(self):
         self.printLog(f'정보 업데이트 및 AI 판단 : {datetime.datetime.now().strftime("%Y%m%d%H%M%S")}')
 
-        self.printLog('잔고 및 주식 정보 갱신')
-        cash = requests.post(self.balance_url, json={}, headers=None )
-        time.sleep(0.34)
-        cash = cash.json()
-        balance = cash['balance']
-        stockDict = cash["dict"]
-        
-        self.agent.set_balance(balance)
-        
-        if self.stock_code in stockDict:
-            self.agent.set_num_stocks(stockDict[self.stock_code]["보유수량"])
-        else:
-            self.agent.set_num_stocks(0)
-        
-        self.gui_window.depositLineEdit.setText(f'{balance}')
-        self.gui_window.currentStockLineEdit.setText(f'{self.environment.get_price()}')
-        self.gui_window.volumeLineEdit.setText(f'{self.environment.get_value()}')
-
         q_sample = collections.deque(maxlen=1)
 
         next_sample = self.build_sample()
@@ -189,8 +177,6 @@ class Trader:
         self.printLog(f'행동 : {action}')
         self.printLog(f'confidence : {confidence}')
         self.printLog(f'exploration : {exploration}')
-
-
 
         if not self.agent.validate_action(action):
             action = TradeAgent.ACTION_HOLD
@@ -227,7 +213,7 @@ class Trader:
             self.printLog("관망")
 
         cash = requests.post(self.balance_url, json={}, headers=None )
-        time.sleep(0.34)
+        time.sleep(0.5)
         cash = cash.json()
         balance = cash['balance']
         stockDict = cash["dict"]
