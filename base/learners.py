@@ -338,9 +338,9 @@ class ReinforcementLearner:
                     self.agent.num_hold, self.agent.num_stocks, 
                     self.agent.portfolio_value, self.learning_cnt, 
                     self.loss, elapsed_time_epoch))
-
-            # 에포크 관련 정보 가시화
-            self.visualize(epoch_str, num_epoches, epsilon)
+            if (epoch+1) == num_epoches:
+                # 에포크 관련 정보 가시화
+                self.visualize(epoch_str, num_epoches, epsilon)
 
             # 학습 관련 정보 갱신
             max_portfolio_value = max(

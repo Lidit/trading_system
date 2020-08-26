@@ -82,7 +82,7 @@ class PriceHandler(RequestHandler):
         hts.dict_stock[code] = {}
         df = PriceHandler.getStockData(self, code, tick, start_date, end_date)
 
-        time.sleep(0.34)
+        #time.sleep(0.34)
         logger.debug("Response to client:")
         logger.debug("request success")
         self.write(json.dumps(df.to_json()))
@@ -90,18 +90,19 @@ class PriceHandler(RequestHandler):
 #예수금 조회
 class BalanceHandler(RequestHandler):
     def post(self):
-        hts.int_주문가능금액 = None
+        hts.dict_callback["예수금상세현황요청"] = None
         hts.kiwoom_TR_OPW00001_예수금상세현황요청(account_num)
-        while not hts.int_주문가능금액:
+
+        while hts.dict_callback["예수금상세현황요청"] is None:
             time.sleep(0.1)
-        
+
         time.sleep(TR_REQ_TIME_INTERVAL)
         hts.kiwoom_TR_OPT10085_계좌수익률요청(account_num)
         while hts.dict_holding is None:
             time.sleep(0.1)
         print(hts.dict_holding.items())
         result = {}
-        result["balance"] = hts.int_주문가능금액
+        result["balance"] = hts.dict_callback["예수금상세현황요청"]["주문가능금액"]
         result["dict"] = hts.dict_holding
         self.write(json.dumps(result))
 

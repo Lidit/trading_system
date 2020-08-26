@@ -346,10 +346,17 @@ class Kiwoom(QAxWidget):
         """
 
         if sRQName == "예수금상세현황요청":
-            self.int_주문가능금액 = int(self.kiwoom_GetCommData(sTRCode, sRQName, 0, "주문가능금액"))
-            logger.debug("예수금상세현황요청: %s" % (self.int_주문가능금액,))
-            if "예수금상세현황요청" in self.dict_callback:
-                self.dict_callback["예수금상세현황요청"](self.int_주문가능금액)
+            #self.int_주문가능금액 = int(self.kiwoom_GetCommData(sTRCode, sRQName, 0, "주문가능금액"))
+            data = {}
+            list_item_name = ["주문가능금액"]
+            for item_name in list_item_name:
+                item_value = self.kiwoom_GetCommData(sTRCode, sRQName, 0, item_name)
+                item_value = item_value.strip()
+                data[item_name] = item_value
+
+            logger.debug("예수금상세현황요청: %s" % (data))
+            self.dict_callback["예수금상세현황요청"] = data
+                
         elif sRQName == "실시간미체결요청":
             d = {}
             d['num'] = self.kiwoom_GetCommData(sTRCode, sRQName, 0, "주문번호")

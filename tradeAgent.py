@@ -32,7 +32,7 @@ class TradeAgent:
         # Agent 클래스의 속성
         self.initial_balance = balance  # 초기 자본금
         self.balance = balance  # 현재 현금 잔고
-
+        
         if stock_code in stock_dick:
             current_value = abs(stock_dick[stock_code]["현재가"])
             self.num_stocks = stock_dick[stock_code]["보유수량"]

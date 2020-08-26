@@ -31,7 +31,7 @@ if __name__ == '__main__':
     parser.add_argument('--balance', type=int, default=10000000)
     parser.add_argument('--num_epoches', type=int, default=100)
     parser.add_argument('--delayed_reward_threshold', 
-        type=float, default=0.05)
+        type=float, default=0.01)
     parser.add_argument('--backend', 
         choices=['tensorflow', 'plaidml'], default='tensorflow')
     parser.add_argument('--output_name', default=utils.get_time_str())
@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     start_date = datetime.datetime.now() - datetime.timedelta(days=0)
     start_date = datetime.datetime.combine(start_date, datetime.time(9,0))
-    end_date = datetime.datetime.combine(datetime.datetime.now(), datetime.time(15,30))
+    end_date = datetime.datetime.combine(datetime.datetime.now() - datetime.timedelta(days=0), datetime.time(15,30))
     
     parser.add_argument('--start_date', default=start_date.strftime("%Y%m%d%H%M%S"))
     parser.add_argument('--end_date', default=end_date.strftime("%Y%m%d%H%M%S"))
