@@ -96,7 +96,7 @@ class Trader:
         print(1)
         time.sleep(0.5)
         cash = cash.json()
-        balance = int(cash["balance"])
+        balance = cash["balance"]
         stock_dict = cash["dict"]
 
 
