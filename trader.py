@@ -93,7 +93,6 @@ class Trader:
 
         self.printLog('초기 잔고 및 주식 정보 갱신')
         cash = requests.post(self.balance_url, json={}, headers=None )
-        print(1)
         time.sleep(0.5)
         cash = cash.json()
         balance = cash["balance"]
@@ -176,7 +175,6 @@ class Trader:
 
         # 신경망 또는 탐험에 의한 행동 결정
         action, confidence, exploration = self.agent.decide_action( pred_value, pred_policy, 0)
-        
         self.printLog(f'행동 : {action}')
         self.printLog(f'confidence : {confidence}')
         self.printLog(f'exploration : {exploration}')
@@ -187,15 +185,16 @@ class Trader:
         self.printLog(f'검증된 행동 : {action}')
         self.printLog(f'예수금 : {self.agent.balance}')
         self.printLog(f'보유 주식 수 : {self.agent.num_stocks}')
-        
+        self.printLog(f'현재가 : {self.agent.environment.get_price()}')
         # 행동 결정에 따른 거래 요청
+
         if action == 0:
             self.printLog("매수")
             data = {
             "qty": self.agent.decide_buy_unit(confidence),
-            "price": 0,
+            "price": self.agent.environment.get_price(),
             "code": self.stock_code,
-            "type": "market",
+            "type": "limit",
             }
             resp = requests.post(self.order_url, data=json.dumps(data))
             time.sleep(0.5)
@@ -205,9 +204,9 @@ class Trader:
             self.printLog("매도")
             data = {
             "qty": -(self.agent.decide_sell_unit(confidence)), 
-            "price": 0,
+            "price": self.agent.environment.get_price(),
             "code": self.stock_code,
-            "type": "market"
+            "type": "limit"
             }
             resp = requests.post(self.order_url, data=json.dumps(data))
             time.sleep(0.5)
