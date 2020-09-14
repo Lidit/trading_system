@@ -93,7 +93,6 @@ class Trader:
 
         self.printLog('초기 잔고 및 주식 정보 갱신')
         cash = requests.post(self.balance_url, json={}, headers=None )
-        print(1)
         time.sleep(0.5)
         cash = cash.json()
         balance = cash["balance"]
