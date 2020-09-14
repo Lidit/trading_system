@@ -99,11 +99,11 @@ class MainWindow(QMainWindow, form_class):
         start_date = datetime.datetime.combine(datetime.datetime.now(), datetime.time(9,0))
         end_date = datetime.datetime.combine(datetime.datetime.now(), datetime.time(15,30))
 
-        if datetime.datetime.now() >= end_date:
-            self.stopPushButtonEvent()
+        # if datetime.datetime.now() >= end_date:
+        #     self.stopPushButtonEvent()
 
-        if datetime.datetime.now() >= start_date:
-            self.trader.trade()
+        # if datetime.datetime.now() >= start_date:
+        self.trader.trade()
 
     def shutdownPushButtonEvent(self):
         exit()
