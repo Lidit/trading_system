@@ -53,7 +53,7 @@ class MainWindow(QMainWindow, form_class) :
         self.startDateDateEdit.setDate(start_date)
         self.endDateDateEdit.setDate(end_date)
 
-        self.stockCodeLineEdit.setText("006400, 032620, 035720, 081000, 108230, 265520")
+        self.stockCodeLineEdit.setText("006400, 032620, 035720, 081000, 108230, 000100")
 
     def timeOut(self):
         current_time = QTime.currentTime()
