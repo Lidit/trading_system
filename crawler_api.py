@@ -95,7 +95,32 @@ class MainWindow(QMainWindow, form_class) :
         end_dateitme = end_datetime.replace(hour=16, minute=0, second=0)
         end_date = end_dateitme.strftime("%Y%m%d%H%M%S")
         for code in stock_code_list:
-            if tick_unit == "분봉":
+            if tick_unit == "틱":
+                self.kiwoom.set_input_value("종목코드", code)
+                self.kiwoom.set_input_value("틱범위", 10)
+                self.kiwoom.set_input_value("수정주가구분", 1)
+                self.kiwoom.comm_rq_data("opt10079_req", "opt10079", 0, "0101")
+
+                ohlcv = self.kiwoom.ohlcv
+
+                while self.kiwoom.remained_data == True:
+                    time.sleep(TR_REQ_TIME_INTERVAL)
+                    if ohlcv['date'][-1] < start_date:
+                        break
+                    self.kiwoom.set_input_value("종목코드", code)
+                    self.kiwoom.set_input_value("틱범위", 30)
+                    self.kiwoom.set_input_value("수정주가구분", 1)
+                    self.kiwoom.comm_rq_data("opt10079_req", "opt10079", 2, "0101")
+                    for key, val in self.kiwoom.ohlcv.items():
+                        ohlcv[key][-1:] = val
+            
+                df = pd.DataFrame(ohlcv, columns=['date', 'current', 'open', 'high', 'low', 'volume'])
+                df = df[df.date >= start_date]
+                df = df.sort_values(by=['date'], axis=0)
+                df = df.reset_index(drop=True)
+                df.to_csv(f'{STOCK_DATA_PATH}/{code}.csv', mode='w', header=False)
+
+            elif tick_unit == "분봉":
                 self.kiwoom.set_input_value("종목코드", code)
                 self.kiwoom.set_input_value("틱범위", tick_range)
                 self.kiwoom.set_input_value("수정주가구분", 1)

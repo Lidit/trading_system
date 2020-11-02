@@ -96,6 +96,11 @@
        <widget class="QComboBox" name="tickTypeComboBox">
         <item>
          <property name="text">
+          <string>틱</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>분봉</string>
          </property>
         </item>

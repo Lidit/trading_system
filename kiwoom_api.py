@@ -33,8 +33,11 @@ class Kiwoom(QAxWidget):
             self.remained_data = True
         else:
             self.remained_data = False
-
-        if rqname == "opt10080_req":
+        
+        if rqname =="opt10079_req":
+            self.opt10079(rqname, trcode)
+            
+        elif rqname == "opt10080_req":
             self.opt10080(rqname, trcode)
         
         elif rqname == "opt10081_req":
@@ -100,7 +103,27 @@ class Kiwoom(QAxWidget):
         ret = self.dynamicCall("CommGetData(QString, QString, QString, int, QString", code,
                                real_type, field_name, index, item_name)
         return ret.strip()
-    
+
+    #틱 가져오기
+    def opt10079(self, rqname, trcode):
+        data_cnt = self.get_repeat_cnt(trcode, rqname)
+        self.ohlcv = {'date':[], 'current':[], 'open':[], 'high':[], 'low':[], 'volume':[]}
+        
+        for i in range(data_cnt):
+            date = self.comm_get_data(trcode, "", rqname, i, "체결시간")
+            current = abs(int(self.comm_get_data(trcode, "", rqname, i, "현재가")))
+            open = abs(int(self.comm_get_data(trcode, "", rqname, i, "시가")))
+            high = abs(int(self.comm_get_data(trcode, "", rqname, i, "고가")))
+            low = abs(int(self.comm_get_data(trcode, "", rqname, i, "저가")))
+            volume = self.comm_get_data(trcode, "", rqname, i, "거래량")
+
+            self.ohlcv['date'].append(date)
+            self.ohlcv['current'].append(current)
+            self.ohlcv['open'].append(int(open))
+            self.ohlcv['high'].append(int(high))
+            self.ohlcv['low'].append(int(low))
+            self.ohlcv['volume'].append(int(volume))
+
     #분봉 가져오기
     def opt10080(self, rqname, trcode):
         data_cnt = self.get_repeat_cnt(trcode, rqname)
