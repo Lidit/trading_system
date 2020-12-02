@@ -47,6 +47,20 @@ def load_stock_data(stock_code):
         data[f'volume_ma{window}_ratio'] = \
             (data[f'volume'] - data[f'volume_ma{window}']) \
             / data[f'volume_ma{window}']
+
+    #MACD 데이터 계산
+    short = 12
+    long = 26
+    sign = 9
+    # data['MACD'] = np.zeros(len(data))
+    # data['MACD'] =  data['current'].ewm(span = short, min_periods = short, adjust=False).mean() - data['current'].ewm(span = long, min_periods = long, adjust=False).mean()
+
+    #data['MACD_sign'] = np.zeros(len(data))
+    #data['MACD_sign'] = data['MACD'].ewm(span=sign, min_periods=sign, adjust=False).mean()
+    # data['MACD_osc'] = np.zeros(len(data))
+    # data['MACD_osc'] = data['MACD'] - data['MACD_sign']
+    #DMI 데이터 계산
+
     return data
 
 def load_stock_index_data():
@@ -175,4 +189,4 @@ def load_data(stock_code, date_from, date_to):
 
 
 if  __name__ == "__main__":
-    load_data('035720', '20200725090000', '20200803153000')
+    load_data('006400', '20201103090000', '20201202153000')
