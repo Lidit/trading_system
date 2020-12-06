@@ -52,11 +52,15 @@ def load_stock_data(stock_code):
     short = 12
     long = 26
     sign = 9
-    # data['MACD'] = np.zeros(len(data))
-    # data['MACD'] =  data['current'].ewm(span = short, min_periods = short, adjust=False).mean() - data['current'].ewm(span = long, min_periods = long, adjust=False).mean()
+    data['MACD'] = np.zeros(len(data))
+    data['MACD'] =  data['current'].ewm(span = short, min_periods = short, adjust=False).mean() - data['current'].ewm(span = long, min_periods = long, adjust=False).mean()
 
-    #data['MACD_sign'] = np.zeros(len(data))
-    #data['MACD_sign'] = data['MACD'].ewm(span=sign, min_periods=sign, adjust=False).mean()
+    data['MACD_sign'] = np.zeros(len(data))
+    data['MACD_sign'] = data['MACD'].ewm(span=sign, min_periods=sign, adjust=False).mean()
+
+    data['PDI'] = np.zeros(len(data))
+    data['MDI']= np.zeros(len(data))
+    
     # data['MACD_osc'] = np.zeros(len(data))
     # data['MACD_osc'] = data['MACD'] - data['MACD_sign']
     #DMI 데이터 계산
