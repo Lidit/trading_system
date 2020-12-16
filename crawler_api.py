@@ -17,7 +17,7 @@ import decorators
 MARKET_KOSPI   = 0
 MARKET_KOSDAQ  = 10
 
-TR_REQ_TIME_INTERVAL = 0.2
+TR_REQ_TIME_INTERVAL = 0.5
 
 STOCK_DATA_PATH = f'{os.path.dirname(os.path.abspath(__file__))}/data/stocks'
 STOCK_INDEX_DATA_PATH = f'{os.path.dirname(os.path.abspath(__file__))}/data/stockIndex'
@@ -47,7 +47,7 @@ class MainWindow(QMainWindow, form_class) :
         
         self.getStockDataButton.clicked.connect(self.getStockData)
 
-        start_date = datetime.datetime.now() - datetime.timedelta(days=30)
+        start_date = datetime.datetime.now() - datetime.timedelta(days=210)
         start_date = datetime.datetime.combine(start_date, datetime.time(9,0))
         end_date = datetime.datetime.combine(datetime.datetime.now(), datetime.time(16,0))
         self.startDateDateEdit.setDate(start_date)
@@ -164,6 +164,7 @@ class MainWindow(QMainWindow, form_class) :
 
                 df = pd.DataFrame(ohlcv, columns=['open', 'high', 'low', 'close', 'volume'], index=ohlcv['date'])
                 df.to_csv(f'{STOCK_DATA_PATH}/{code}.csv', mode='w')
+            print(code)
         
         if self.checkBox.isChecked():
             self.kiwoom.set_input_value("업종코드", "001")

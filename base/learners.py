@@ -56,7 +56,7 @@ class ReinforcementLearner:
         self.policy_network = policy_network
         self.reuse_models = reuse_models
         # 가시화 모듈
-        self.visualizer = Visualizer()
+        #self.visualizer = Visualizer()
         # 메모리
         self.memory_sample = []
         self.memory_action = []
@@ -114,7 +114,7 @@ class ReinforcementLearner:
         # 에이전트 초기화
         self.agent.reset()
         # 가시화 초기화
-        self.visualizer.clear([0, len(self.chart_data)])
+        #self.visualizer.clear([0, len(self.chart_data)])
         # 메모리 초기화
         self.memory_sample = []
         self.memory_action = []
@@ -227,7 +227,7 @@ class ReinforcementLearner:
 
         # 가시화 준비
         # 차트 데이터는 변하지 않으므로 미리 가시화
-        self.visualizer.prepare(self.environment.chart_data, info)
+        #self.visualizer.prepare(self.environment.chart_data, info)
 
         # 가시화 결과 저장할 폴더 준비
         self.epoch_summary_dir = os.path.join(
@@ -338,9 +338,9 @@ class ReinforcementLearner:
                     self.agent.num_hold, self.agent.num_stocks, 
                     self.agent.portfolio_value, self.learning_cnt, 
                     self.loss, elapsed_time_epoch))
-            if (epoch+1) == num_epoches:
+            #if (epoch+1) == num_epoches:
                 # 에포크 관련 정보 가시화
-                self.visualize(epoch_str, num_epoches, epsilon)
+               # self.visualize(epoch_str, num_epoches, epsilon)
 
             # 학습 관련 정보 갱신
             max_portfolio_value = max(
