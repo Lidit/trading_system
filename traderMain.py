@@ -56,14 +56,14 @@ class MainWindow(QMainWindow, form_class):
         current_price_url = "http://127.0.0.1:5550/currentPrice"
         stock_code = self.inputStockCodeLineEdit.text()
         
-        start_date = datetime.datetime.now() - datetime.timedelta(days=5)
+        start_date = datetime.datetime.now() - datetime.timedelta(days=7)
         start_date = datetime.datetime.combine(start_date, datetime.time(9,0))
         end_date = datetime.datetime.combine(datetime.datetime.now(), datetime.time(16,0))
 
         value_network_path = os.path.join(settings.BASE_DIR,
-                                                'models/a3c_lstm_value_081000_108230_006400_265520_032620.h5')
+                                                'models/a3c_lstm_value_1205_MACD_DMI.h5')
         policy_network_path = os.path.join(settings.BASE_DIR,
-                                                'models/a3c_lstm_policy_081000_108230_006400_265520_032620.h5')
+                                                'models/a3c_lstm_policy_1205_MACD_DMI.h5')
         
         # 공통 파라미터 설정
         
@@ -99,11 +99,11 @@ class MainWindow(QMainWindow, form_class):
         start_date = datetime.datetime.combine(datetime.datetime.now(), datetime.time(9,0))
         end_date = datetime.datetime.combine(datetime.datetime.now(), datetime.time(15,30))
 
-        # if datetime.datetime.now() >= end_date:
-        #     self.stopPushButtonEvent()
+        if datetime.datetime.now() >= end_date:
+            self.stopPushButtonEvent()
 
-        # if datetime.datetime.now() >= start_date:
-        self.trader.trade()
+        if datetime.datetime.now() >= start_date:
+            self.trader.trade()
 
     def shutdownPushButtonEvent(self):
         exit()

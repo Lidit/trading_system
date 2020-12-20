@@ -129,7 +129,7 @@ class Trader:
     def build_sample(self):
         # self.chart_data = chart_data
         
-        start_date = datetime.datetime.now() - datetime.timedelta(days=5)
+        start_date = datetime.datetime.now() - datetime.timedelta(days=7)
         start_date = datetime.datetime.combine(start_date, datetime.time(9,0))
         end_date = datetime.datetime.combine(datetime.datetime.now(), datetime.time(16,0))
 
@@ -192,7 +192,7 @@ class Trader:
             self.printLog("매수")
             data = {
             "qty": self.agent.decide_buy_unit(confidence),
-            "price": self.agent.environment.get_price(),
+            "price": int(self.agent.environment.get_price()),
             "code": self.stock_code,
             "type": "limit",
             }
@@ -204,7 +204,7 @@ class Trader:
             self.printLog("매도")
             data = {
             "qty": -(self.agent.decide_sell_unit(confidence)), 
-            "price": self.agent.environment.get_price(),
+            "price": int(self.agent.environment.get_price()),
             "code": self.stock_code,
             "type": "limit"
             }
