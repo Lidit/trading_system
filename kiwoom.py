@@ -527,7 +527,7 @@ class Kiwoom(QAxWidget):
                 # logger.debug("계좌수익: %s" % (dict_holding,))
             self.dict_holding = result
             if '계좌수익률요청' in self.dict_callback:
-                self.dict_callback['계좌수익률요청'](self.dict_holding)
+                self.dict_callback['계좌수익률요청'] = self.dict_holding
         elif sRQName.startswith("RQ_"):
             logger.debug("RQ handler")
             result = self.kiwoom_GetCommData(sTRCode, sRQName, 0, "")

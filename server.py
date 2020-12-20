@@ -97,13 +97,16 @@ class BalanceHandler(RequestHandler):
             time.sleep(0.1)
 
         time.sleep(TR_REQ_TIME_INTERVAL)
+
+        hts.dict_callback["계좌수익률요청"] = None
         hts.kiwoom_TR_OPT10085_계좌수익률요청(account_num)
-        while hts.dict_holding is None:
+
+        while hts.dict_callback["계좌수익률요청"] is None:
             time.sleep(0.1)
-        print(hts.dict_holding.items())
+            
         result = {}
         result["balance"] = int(hts.dict_callback["예수금상세현황요청"]["주문가능금액"])
-        result["dict"] = hts.dict_holding
+        result["dict"] = hts.dict_callback["계좌수익률요청"]
         self.write(json.dumps(result))
 
 #현재 주식 가격 조회
