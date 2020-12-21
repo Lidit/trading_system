@@ -39,8 +39,9 @@ if __name__ == '__main__':
     parser.add_argument('--policy_network_name')
     parser.add_argument('--reuse_models', action='store_true')
     parser.add_argument('--learning', action='store_true')
-
-    start_date = datetime.datetime.now() - datetime.timedelta(days=60)
+    parser.add_argument('--days', type=int, default=0)
+    args = parser.parse_args()
+    start_date = datetime.datetime.now() - datetime.timedelta(days=args.days)
     start_date = datetime.datetime.combine(start_date, datetime.time(9,0))
     end_date = datetime.datetime.combine(datetime.datetime.now() - datetime.timedelta(days=0), datetime.time(15,30))
     
