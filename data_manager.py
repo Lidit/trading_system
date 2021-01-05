@@ -7,11 +7,15 @@ COLUMNS_CHART_DATA = ['date','current', 'open', 'high', 'low', 'volume']
 
 COLUMNS_INDEX_DATA = ['KOSPI'] #KOSDAQ
 
-def load_stock_data(stock_code):
-    path = os.path.join(settings.BASE_DIR, f'data\stocks\{stock_code}.csv')
-    data = pd.read_csv(path, thousands=',', header=None, names=COLUMNS_CHART_DATA,
-        converters={'date': lambda x: str(x)})
-
+def load_stock_data(stock_code, json_data = None):
+    data = None
+    if json_data is None:
+        path = os.path.join(settings.BASE_DIR, f'data\stocks\{stock_code}.csv')
+        data = pd.read_csv(path, thousands=',', header=None, names=COLUMNS_CHART_DATA,
+            converters={'date': lambda x: str(x)})
+    else:
+        data = pd.read_json(json_data)
+    
     windows = [5, 10, 20, 60, 120]
     for window in windows:
         data[f'current_ma{window}'] = \
@@ -187,6 +191,20 @@ def load_data(stock_code, date_from, date_to):
 
     training_data.drop(['date'], axis=1, inplace=True)
     training_data.to_csv(data_path, mode='w', header=False)
+    return chart_data, training_data
+
+def load_data(stock_code, json_data):
+    data = load_stock_data(stock_code, json_data)
+    data = data.dropna()
+
+    chart_data = data[COLUMNS_CHART_DATA]
+    chart_data.reset_index(drop=True, inplace=True)
+
+    training_data = load_stock_data(stock_code, json_data)
+    training_data.set_index(training_data['date'], inplace=True)
+    training_data = training_data.dropna()
+    training_data.drop(['date'], axis=1, inplace=True)
+
     return chart_data, training_data
 
 def average_directional_movement_index(df, n=14, n_ADX=14):

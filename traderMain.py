@@ -51,7 +51,7 @@ class MainWindow(QMainWindow, form_class):
         #logTextBrowser
 
     def initTrader(self):
-        price_url = "http://127.0.0.1:5550/price"
+        price_url = "http://127.0.0.1:5550/stock_chart"
         balance_url = "http://127.0.0.1:5550/balance"
         current_price_url = "http://127.0.0.1:5550/currentPrice"
         stock_code = self.inputStockCodeLineEdit.text()
@@ -74,12 +74,13 @@ class MainWindow(QMainWindow, form_class):
                                                 "end_date" : end_date.strftime("%Y%m%d%H%M%S")
                                                 }, 
                                                 headers=None)
+        
         while not price.json():
             time.sleep(0.34)
 
         # 갱신된 차트 데이터 불러오기
-        chart_data, training_data = data_manager.load_data(stock_code, start_date.strftime("%Y%m%d%H%M%S"), end_date.strftime("%Y%m%d%H%M%S"))
-
+        chart_data, training_data = data_manager.load_data(stock_code, price.json())
+        print(chart_data)
         min_trading_unit = max(
                 int(1000000 / chart_data.iloc[-1]['current']), 1)
         max_trading_unit = max(
@@ -101,6 +102,7 @@ class MainWindow(QMainWindow, form_class):
 
         if datetime.datetime.now() >= end_date:
             self.stopPushButtonEvent()
+            return
 
         if datetime.datetime.now() >= start_date:
             self.trader.trade()
@@ -111,7 +113,8 @@ class MainWindow(QMainWindow, form_class):
     def startPushButtonEvent(self):
         self.initTrader()
         self.stockCodeLineEdit.setText(self.inputStockCodeLineEdit.text())
-        self.sched.add_job(self.job_trade, 'cron', second='0, 30', id=self.inputStockCodeLineEdit.text(), max_instances=1)
+        # self.sched.add_job(self.job_trade, 'cron', second='0, 30', id=self.inputStockCodeLineEdit.text(), max_instances=1)
+        self.sched.add_job(self.job_trade, 'cron', second='0', id=self.inputStockCodeLineEdit.text(), max_instances=1)
         self.logTextBrowser.append('거래 시작됨')
 
     def stopPushButtonEvent(self):

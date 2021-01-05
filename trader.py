@@ -8,7 +8,7 @@ import threading
 import time
 
 from pandas import DataFrame
-
+import pandas as pd
 import os
 import settings
 import datetime
@@ -79,7 +79,7 @@ class Trader:
     value_network_path=None, policy_network_path=None, delayed_reward_threshold =.05):
 
         self.balance_url = "http://127.0.0.1:5550/balance"
-        self.price_url = "http://127.0.0.1:5550/price"
+        self.price_url = "http://127.0.0.1:5550/stock_chart"
         self.order_url = "http://127.0.0.1:5550/order"
 
         # 환경 설정
@@ -147,7 +147,7 @@ class Trader:
 
         self.printLog('차트 정보 갱신')
 
-        chart_data, training_data = data_manager.load_data(self.stock_code, start_date.strftime("%Y%m%d%H%M%S"), end_date.strftime("%Y%m%d%H%M%S"))
+        chart_data, training_data = data_manager.load_data(self.stock_code, price.json())
         self.chart_data = chart_data
         self.environment.set_chart_data(self.chart_data)
         self.agent.environment.set_chart_data(self.chart_data)
