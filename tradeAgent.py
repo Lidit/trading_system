@@ -64,7 +64,11 @@ class TradeAgent:
         # self.environment.observe()
         self.printLog(f'"현재 evironment에서 인식하는 가격: " {self.environment.get_price()}')
         self.printLog(f'"현재 포트폴리오 가치: " {self.portfolio_value}')
-
+        
+        if self.portfolio_value == 0 or self.environment.get_price() == 0:
+            self.ratio_hold = 0
+            self.ratio_portfolio_value = 0
+            return (self.ratio_hold, self.ratio_portfolio_value)
         self.ratio_hold = self.num_stocks / int(
             self.portfolio_value / self.environment.get_price())
         self.ratio_portfolio_value = (
