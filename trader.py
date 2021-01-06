@@ -147,7 +147,7 @@ class Trader:
 
         self.printLog('차트 정보 갱신')
 
-        chart_data, training_data = data_manager.load_data(self.stock_code, price.json())
+        chart_data, training_data = data_manager.load_data(self.stock_code, json_data=price.json())
         self.chart_data = chart_data
         self.environment.set_chart_data(self.chart_data)
         self.agent.environment.set_chart_data(self.chart_data)

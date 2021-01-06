@@ -163,49 +163,50 @@ def load_stock_index_data():
 #         training_data = pd.merge(training_data, data, on='date')
 #     return training_data
 
-def load_data(stock_code, date_from, date_to):
-    default_training_dir = os.path.join(settings.BASE_DIR, 'data/training')
-    if not os.path.isdir(default_training_dir):
-            os.makedirs(default_training_dir)
+def load_data(stock_code, date_from=None, date_to=None, json_data = None):
+    if json_data is None:
+        default_training_dir = os.path.join(settings.BASE_DIR, 'data/training')
+        if not os.path.isdir(default_training_dir):
+                os.makedirs(default_training_dir)
+        
+        data = load_stock_data(stock_code)
+
+        data = data[(data['date'] >= date_from) & (data['date'] <= date_to)]
+        data = data.dropna()
+        data_path = f'{default_training_dir}/1.default_{stock_code}.csv'
+        pd.DataFrame(data).to_csv(data_path, mode='w', header=False)
+
+        # 차트 데이터 분리
+        chart_data = data[COLUMNS_CHART_DATA]
+        chart_data.reset_index(drop=True, inplace=True)
+        
+        training_data = load_stock_data(stock_code)
+        #training_data = pd.merge(training_data, load_stock_index_data(), on='date')
+        
+        data_path = f'{default_training_dir}/3.custom_training_{stock_code}.csv'
+
+        training_data.set_index(training_data['date'], inplace=True)
+
+        training_data = training_data[(training_data['date'] >= date_from) & (training_data['date'] <= date_to)]
+        training_data = training_data.dropna()
+
+        training_data.drop(['date'], axis=1, inplace=True)
+        training_data.to_csv(data_path, mode='w', header=False)
+        return chart_data, training_data
+
+    else:
+        data = load_stock_data(stock_code, json_data)
+        data = data.dropna()
+
+        chart_data = data[COLUMNS_CHART_DATA]
+        chart_data.reset_index(drop=True, inplace=True)
+
+        training_data = load_stock_data(stock_code, json_data)
+        training_data.set_index(training_data['date'], inplace=True)
+        training_data = training_data.dropna()
+        training_data.drop(['date'], axis=1, inplace=True)
+        return chart_data, training_data
     
-    data = load_stock_data(stock_code)
-
-    data = data[(data['date'] >= date_from) & (data['date'] <= date_to)]
-    data = data.dropna()
-    data_path = f'{default_training_dir}/1.default_{stock_code}.csv'
-    pd.DataFrame(data).to_csv(data_path, mode='w', header=False)
-
-    # 차트 데이터 분리
-    chart_data = data[COLUMNS_CHART_DATA]
-    chart_data.reset_index(drop=True, inplace=True)
-    
-    training_data = load_stock_data(stock_code)
-    #training_data = pd.merge(training_data, load_stock_index_data(), on='date')
-    
-    data_path = f'{default_training_dir}/3.custom_training_{stock_code}.csv'
-
-    training_data.set_index(training_data['date'], inplace=True)
-
-    training_data = training_data[(training_data['date'] >= date_from) & (training_data['date'] <= date_to)]
-    training_data = training_data.dropna()
-
-    training_data.drop(['date'], axis=1, inplace=True)
-    training_data.to_csv(data_path, mode='w', header=False)
-    return chart_data, training_data
-
-def load_data(stock_code, json_data):
-    data = load_stock_data(stock_code, json_data)
-    data = data.dropna()
-
-    chart_data = data[COLUMNS_CHART_DATA]
-    chart_data.reset_index(drop=True, inplace=True)
-
-    training_data = load_stock_data(stock_code, json_data)
-    training_data.set_index(training_data['date'], inplace=True)
-    training_data = training_data.dropna()
-    training_data.drop(['date'], axis=1, inplace=True)
-
-    return chart_data, training_data
 
 def average_directional_movement_index(df, n=14, n_ADX=14):
     """Calculate the Average Directional Movement Index for given data.

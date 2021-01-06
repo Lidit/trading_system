@@ -79,7 +79,7 @@ class MainWindow(QMainWindow, form_class):
             time.sleep(0.34)
 
         # 갱신된 차트 데이터 불러오기
-        chart_data, training_data = data_manager.load_data(stock_code, price.json())
+        chart_data, training_data = data_manager.load_data(stock_code, json_data=price.json())
         print(chart_data)
         min_trading_unit = max(
                 int(1000000 / chart_data.iloc[-1]['current']), 1)
