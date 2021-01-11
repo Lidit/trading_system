@@ -1,0 +1,13 @@
+PyQt5==5.13.0
+PyQt5-sip==4.19.19
+pyqt5-tools==5.13.0.1.5
+mplfinance==0.12.3a3
+yfinance==0.1.54
+pandas==1.0.1
+pandas-datareader==0.8.1
+keras==2.2.4
+tensorflow==1.15.2
+tornado==6.0.3
+requests==2.22.0
+numpy==1.18.1
+APScheduler==3.6.3
