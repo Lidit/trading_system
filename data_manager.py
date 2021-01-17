@@ -14,8 +14,8 @@ def load_stock_data(stock_code, json_data = None):
         data = pd.read_csv(path, thousands=',', header=None, names=COLUMNS_CHART_DATA,
             converters={'date': lambda x: str(x)})
     else:
-        data = pd.read_json(json_data)
-    
+        data = pd.read_json(json_data, convert_dates=False)
+
     windows = [5, 10, 20, 60, 120]
     for window in windows:
         data[f'current_ma{window}'] = \
@@ -51,6 +51,7 @@ def load_stock_data(stock_code, json_data = None):
         data[f'volume_ma{window}_ratio'] = \
             (data[f'volume'] - data[f'volume_ma{window}']) \
             / data[f'volume_ma{window}']
+
     #https://github.com/Crypto-toolbox/pandas-technical-indicators/blob/master/technical_indicators.py
     #MACD 데이터 계산
     short = 12

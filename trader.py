@@ -127,8 +127,6 @@ class Trader:
 
        
     def build_sample(self):
-        # self.chart_data = chart_data
-        
         start_date = datetime.datetime.now() - datetime.timedelta(days=7)
         start_date = datetime.datetime.combine(start_date, datetime.time(9,0))
         end_date = datetime.datetime.combine(datetime.datetime.now(), datetime.time(16,0))
