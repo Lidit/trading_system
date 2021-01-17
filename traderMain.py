@@ -38,6 +38,9 @@ class MainWindow(QMainWindow, form_class):
         self.stopTradePushButton.clicked.connect(self.stopPushButtonEvent)
         self.shutdownPushButton.clicked.connect(self.shutdownPushButtonEvent)
 
+        self.startTradePushButton.setEnabled(False)
+        self.inputStockCodeLineEdit.setText("011930")
+        self.startPushButtonEvent()        
         #depositLineEdit
         #availableLineEdit
         #stockCodeLineEdit
@@ -129,6 +132,7 @@ class MainWindow(QMainWindow, form_class):
     def stopPushButtonEvent(self):
         self.sched.remove_all_jobs()
         self.logTextBrowser.append('거래 종료됨')
+        self.startTradePushButton.setEnabled(True)
 
 
 if __name__ == '__main__':
