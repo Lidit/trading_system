@@ -51,7 +51,6 @@ class RealTimeEnvironment():
     
     def get_price(self):
         if self.observation is not None:
-            print(self.observation)
             return self.observation[self.PRICE_IDX]
         return None
 

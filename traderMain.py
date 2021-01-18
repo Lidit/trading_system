@@ -25,11 +25,12 @@ import time
 ui_path = f'{os.path.dirname(os.path.abspath(__file__))}/ui/trader_ui.ui'
 form_class = uic.loadUiType(ui_path)[0]
 
+
 class MainWindow(QMainWindow, form_class):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        
+
         self.sched = BackgroundScheduler()
         self.sched.start()
 
@@ -37,6 +38,9 @@ class MainWindow(QMainWindow, form_class):
         self.stopTradePushButton.clicked.connect(self.stopPushButtonEvent)
         self.shutdownPushButton.clicked.connect(self.shutdownPushButtonEvent)
 
+        self.startTradePushButton.setEnabled(False)
+        self.inputStockCodeLineEdit.setText("011930")
+        self.startPushButtonEvent()        
         #depositLineEdit
         #availableLineEdit
         #stockCodeLineEdit
@@ -55,50 +59,57 @@ class MainWindow(QMainWindow, form_class):
         balance_url = "http://127.0.0.1:5550/balance"
         current_price_url = "http://127.0.0.1:5550/currentPrice"
         stock_code = self.inputStockCodeLineEdit.text()
-        
+
         start_date = datetime.datetime.now() - datetime.timedelta(days=7)
-        start_date = datetime.datetime.combine(start_date, datetime.time(9,0))
-        end_date = datetime.datetime.combine(datetime.datetime.now(), datetime.time(16,0))
+        start_date = datetime.datetime.combine(start_date, datetime.time(9, 0))
+        end_date = datetime.datetime.combine(
+            datetime.datetime.now(), datetime.time(16, 0))
 
         value_network_path = os.path.join(settings.BASE_DIR,
-                                                'models/a3c_lstm_value_1205_MACD_DMI.h5')
+                                          'models/a3c_lstm_value_1205_MACD_DMI.h5')
         policy_network_path = os.path.join(settings.BASE_DIR,
-                                                'models/a3c_lstm_policy_1205_MACD_DMI.h5')
-        
+                                           'models/a3c_lstm_policy_1205_MACD_DMI.h5')
+
         # 공통 파라미터 설정
-        
+
         # 키움 서버에서 차트 데이터 갱신해 저장하기
-        price = requests.post(price_url, json={"code" :  stock_code, 
-                                                "tick" : 1, 
-                                                "start_date" : start_date.strftime("%Y%m%d%H%M%S"), 
-                                                "end_date" : end_date.strftime("%Y%m%d%H%M%S")
-                                                }, 
-                                                headers=None)
-        
+        price = requests.post(price_url, json={"code":  stock_code,
+                                               "tick": 1,
+                                               "start_date": start_date.strftime("%Y%m%d%H%M%S"),
+                                               "end_date": end_date.strftime("%Y%m%d%H%M%S")
+                                               },
+                              headers=None)
+
         while not price.json():
             time.sleep(0.34)
 
         # 갱신된 차트 데이터 불러오기
-        chart_data, training_data = data_manager.load_data(stock_code, json_data=price.json())
+        chart_data, training_data = data_manager.load_data(
+            stock_code, json_data=price.json())
+
         print(chart_data)
+        print(training_data)
+
         min_trading_unit = max(
-                int(1000000 / chart_data.iloc[-1]['current']), 1)
+            int(1000000 / chart_data.iloc[-1]['current']), 1)
         max_trading_unit = max(
-                int(10000000 / chart_data.iloc[-1]['current']), 1)
-        common_params = {'gui_window':self,
-                        'stock_code': stock_code,
-                        'delayed_reward_threshold': 0.05,
-                        'num_steps': 1,
-                        'chart_data': chart_data,
-                        'training_data': training_data
-                        }
+            int(10000000 / chart_data.iloc[-1]['current']), 1)
+        common_params = {'gui_window': self,
+                         'stock_code': stock_code,
+                         'delayed_reward_threshold': 0.05,
+                         'num_steps': 1,
+                         'chart_data': chart_data,
+                         'training_data': training_data
+                         }
         # 거래 시작
 
         self.trader = Trader(**common_params)
 
     def job_trade(self):
-        start_date = datetime.datetime.combine(datetime.datetime.now(), datetime.time(9,0))
-        end_date = datetime.datetime.combine(datetime.datetime.now(), datetime.time(15,30))
+        start_date = datetime.datetime.combine(
+            datetime.datetime.now(), datetime.time(9, 0))
+        end_date = datetime.datetime.combine(
+            datetime.datetime.now(), datetime.time(15, 30))
 
         if datetime.datetime.now() >= end_date:
             self.stopPushButtonEvent()
@@ -113,13 +124,16 @@ class MainWindow(QMainWindow, form_class):
     def startPushButtonEvent(self):
         self.initTrader()
         self.stockCodeLineEdit.setText(self.inputStockCodeLineEdit.text())
-        # self.sched.add_job(self.job_trade, 'cron', second='0, 30', id=self.inputStockCodeLineEdit.text(), max_instances=1)
-        self.sched.add_job(self.job_trade, 'cron', second='0', id=self.inputStockCodeLineEdit.text(), max_instances=1)
+        self.sched.add_job(self.job_trade, 'cron', second='0, 30',
+                           id=self.inputStockCodeLineEdit.text(), max_instances=1)
+        # self.sched.add_job(self.job_trade, 'cron', second='0', id=self.inputStockCodeLineEdit.text(), max_instances=1)
         self.logTextBrowser.append('거래 시작됨')
 
     def stopPushButtonEvent(self):
         self.sched.remove_all_jobs()
         self.logTextBrowser.append('거래 종료됨')
+        self.startTradePushButton.setEnabled(True)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
