@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-import os
-import sys
+import os, sys
 import logging
 import argparse
 import json
 import datetime
 import data_manager
 import settings
+import holiday
 
 from base import utils
 
@@ -41,10 +41,37 @@ if __name__ == '__main__':
     parser.add_argument('--learning', action='store_true')
     parser.add_argument('--days', type=int, default=0)
     args = parser.parse_args()
-    start_date = datetime.datetime.now() - datetime.timedelta(days=args.days)
+
+    today = datetime.date.today() + datetime.timedelta(days=0)
+    print(today)
+    data = holiday.getHolidayInfo(today)
+
+    if holiday.isHoliday(data, today):
+        print("오늘은 휴일 입니다. 종료.")
+        exit()
+
+    tomorrow = today + datetime.timedelta(days=1)
+    data = holiday.getHolidayInfo(tomorrow)
+    print(data)
+
+    i = 0
+    if holiday.isHoliday(data, tomorrow):
+        while True:
+            date = today - datetime.timedelta(days=i)
+            print(date)
+            data = holiday.getHolidayInfo(date)
+            if holiday.isHoliday(data, date):
+                if i > 0:
+                    i -= 1
+                break
+            i += 1
+    print(i)
+    
+    start_date = datetime.datetime.now() - datetime.timedelta(days=i)
     start_date = datetime.datetime.combine(start_date, datetime.time(9,0))
     end_date = datetime.datetime.combine(datetime.datetime.now() - datetime.timedelta(days=0), datetime.time(15,30))
-    
+    print(start_date)
+    print(end_date)
     parser.add_argument('--start_date', default=start_date.strftime("%Y%m%d%H%M%S"))
     parser.add_argument('--end_date', default=end_date.strftime("%Y%m%d%H%M%S"))
     args = parser.parse_args()
