@@ -53,7 +53,7 @@ if __name__ == '__main__':
     tomorrow = today + datetime.timedelta(days=1)
     data = holiday.getHolidayInfo(tomorrow)
     print(data)
-
+    
     i = 0
     if holiday.isHoliday(data, tomorrow):
         while True:
@@ -98,7 +98,10 @@ if __name__ == '__main__':
     stream_handler.setLevel(logging.INFO)
     logging.basicConfig(format="%(message)s",
                         handlers=[file_handler, stream_handler], level=logging.DEBUG)
-        
+    
+    logging.info('start_date %s' % start_date)
+    logging.info('end_date %s' % end_date)
+
     # 로그, Keras Backend 설정을 먼저하고 RLTrader 모듈들을 이후에 임포트해야 함
     from base.agent import Agent
     from base.learners import ActorCriticLearner, A2CLearner, A3CLearner
