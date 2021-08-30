@@ -22,6 +22,7 @@ def getHolidayInfo(date):
     response = requests.get(url=request_query)
     jsonString = json.dumps(xmltodict.parse(response.text), indent=4)
     dict = json.loads(jsonString)
+    print(dict)
     return dict['response']['body']
 
 
@@ -53,7 +54,7 @@ def isHoliday(data, today):
 
 
 if __name__ == '__main__':
-    today = datetime.date.today() + datetime.timedelta(days=-120)
+    today = datetime.date.today()
     print(today)
     tomorrow = today + datetime.timedelta(days=1)
     data = getHolidayInfo(tomorrow)
